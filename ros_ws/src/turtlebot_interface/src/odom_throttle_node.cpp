@@ -31,6 +31,7 @@ void NodeOdometryThrottle::Callback(
     {
         prev_odom_msg_published_ = *odom_msg;
         throttled_odom_pub_.publish(odom_msg);
+        odom_published_at_least_once_ = true;
         return;
     }
 
@@ -80,7 +81,8 @@ bool NodeOdometryThrottle::ExceedsThresholds(
     Eigen::Vector3f prev_rotation_angles = prev_quat.toRotationMatrix().eulerAngles(0, 1, 2);
 
     // Compare Yaw angle
-    if (std::fabs(curr_rotation_angles[2] - prev_rotation_angles[2]) >= rotation_threshold_)
+    float yaw_rotation = std::fabs(curr_rotation_angles[2] - prev_rotation_angles[2]);
+    if (yaw_rotation >= rotation_threshold_)
     {
         return true;
     }
