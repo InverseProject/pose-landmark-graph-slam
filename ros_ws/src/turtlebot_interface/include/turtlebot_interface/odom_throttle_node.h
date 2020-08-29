@@ -27,6 +27,7 @@ private:
     float rotation_threshold_ = 0.1; // in radians (~ 5 deg)
 
     // Current variables
+    bool odom_published_at_least_once_ = false;
     nav_msgs::Odometry prev_odom_msg_published_;
 
     // Publishers
@@ -34,6 +35,9 @@ private:
 
     // Subscribers
     ros::Subscriber odom_sub_;
+
+    // Helper functions
+    bool ExceedsThresholds(const nav_msgs::OdometryConstPtr& odom_msg);
 
 };
 

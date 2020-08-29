@@ -1,4 +1,5 @@
 
+#include <Eigen/Dense>
 #include <turtlebot_interface/odom_throttle_node.h>
 
 namespace turtlebot_interface
@@ -19,6 +20,72 @@ NodeOdometryThrottle::NodeOdometryThrottle(
 
     // Setup publisher
     throttled_odom_pub_ = nh.advertise<nav_msgs::Odometry>(out_odom_topic, 5);
+}
+
+NodeOdometryThrottle::~NodeOdometryThrottle() = default;
+
+void NodeOdometryThrottle::Callback(
+    const nav_msgs::OdometryConstPtr& odom_msg)
+{
+    if (!odom_published_at_least_once_)
+    {
+        prev_odom_msg_published_ = *odom_msg;
+        throttled_odom_pub_.publish(odom_msg);
+        return;
+    }
+
+    if (ExceedsThresholds(odom_msg))
+    {
+        prev_odom_msg_published_ = *odom_msg;
+        throttled_odom_pub_.publish(odom_msg);
+    }
+}
+
+bool NodeOdometryThrottle::ExceedsThresholds(
+    const nav_msgs::OdometryConstPtr& odom_msg)
+{
+    // Compare poses
+    Eigen::Vector3f prev_pose, curr_pose;
+
+    curr_pose << 
+        odom_msg->pose.pose.position.x,
+        odom_msg->pose.pose.position.y,
+        odom_msg->pose.pose.position.z;
+    
+    prev_pose <<
+        prev_odom_msg_published_.pose.pose.position.x,
+        prev_odom_msg_published_.pose.pose.position.y,
+        prev_odom_msg_published_.pose.pose.position.z;
+    
+    float distance = (curr_pose - prev_pose).norm();
+    if (distance >= distance_threshold_)
+    {
+        return true;
+    }
+
+    // Compare rotations
+    Eigen::Quaternionf curr_quat = Eigen::Quaternionf(
+        odom_msg->pose.pose.orientation.w,
+        odom_msg->pose.pose.orientation.x,
+        odom_msg->pose.pose.orientation.y,
+        odom_msg->pose.pose.orientation.z);
+    
+    Eigen::Quaternionf prev_quat = Eigen::Quaternionf(
+        prev_odom_msg_published_.pose.pose.orientation.w,
+        prev_odom_msg_published_.pose.pose.orientation.x,
+        prev_odom_msg_published_.pose.pose.orientation.y,
+        prev_odom_msg_published_.pose.pose.orientation.z);
+
+    Eigen::Vector3f curr_rotation_angles = curr_quat.toRotationMatrix().eulerAngles(0, 1, 2);
+    Eigen::Vector3f prev_rotation_angles = prev_quat.toRotationMatrix().eulerAngles(0, 1, 2);
+
+    // Compare Yaw angle
+    if (std::fabs(curr_rotation_angles[2] - prev_rotation_angles[2]) >= rotation_threshold_)
+    {
+        return true;
+    }
+
+    return false;
 }
 
     
