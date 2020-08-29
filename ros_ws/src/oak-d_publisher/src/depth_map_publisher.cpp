@@ -7,115 +7,61 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "oak-d_publisher/depth_map_publisher.hpp"
+#include <sensor_msgs/Image.h>
 
 using namespace std;
     
 DepthMapPublisher::DepthMapPublisher(
             const std::string& config_file_path,
             const std::string& depth_map_topic,
-            const std::string& landmark_topic){
-
-        
-
-
-}
-
-int main(){
+            const std::string& landmark_topic,
+            const int rate):
+            _config_file_path(config_file_path), 
+            _depth_map_topic(depth_map_topic),
+            _landmark_topic(landmark_topic){
 
     ros::init(argc, argv, "oak_publisher");
     ros::NodeHandle n;
+    ros::Rate loop_rate(rate);
 
-    std::ifstream myFile("../config.json");
-    std::ostringstream tmp;
-    tmp << myFile.rdbuf();
-    std::string config = tmp.str();
-// ref: https://github.com/luxonis/depthai/blob/f26f8c6a5008ae32a388d482e0f16c72d428decf/depthai.py#L199
+    std::ifstream file(_config_file_path);
+    std::ostringstream file_stream;
+    file_stream << file.rdbuf();
+    std::string config_str = file_stream.str();
 
-    Device d("", true);
-    // cout << "------------found---------" << endl;
-    cout << config << endl;
-    std::shared_ptr<CNNHostPipeline> pipeline = d.create_pipeline(config);
-    ros::Rate loop_rate(20);
-    std::tuple<
-        std::list<std::shared_ptr<NNetPacket>>,
-        std::list<std::shared_ptr<HostDataPacket>>>
+    Device oak("", true);
+    _pipeline = oak.create_pipeline(config_str);
 
-    pipeline.getAvailableNNetAndDataPackets(false);
-    while(ros::ok()){
-        
-        
-        
+    _depth_map_pub = n.advertise<sensor_msgs::Image>(_depth_map_topic, 2);
+}
+
+
+DepthMapPublisher::publisher(){
     
+    sensor_msgs::Image depth_map;
+    depth_map.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
 
+    while(ros::ok()){
 
+        _packets = pipeline->getAvailableNNetAndDataPackets(true);
+        std::list<std::shared_ptr<HostDataPacket>> host_packet = get<1>(packets);
+        
+        for(auto sub_packet :  host_packet){
+            std::cout << "Stream name ::------->" << sub_packet->stream_name << std::endl
+            if(sub_packet->stream_name == "depth_raw"){
+
+            }
+         }
 
     }
 
-   
 
-
-
-    int wait;
-    cin >> wait;
-
-    return 0;
 }
+
 
 
 int main(){
-    using namespace std;
-    cout << "Hello World!" << endl;
 
-    // std::string config = "{\
-    //     \"streams\": [{\"name\":\"depth_raw\", \"max_fps\": 30.0},],\
-    // \"depth\":\
-    // {\
-    //     \"calibration_file\": consts.resource_paths.calib_fpath,\
-    //     \"padding_factor\": 0.3,\
-    //     \"depth_limit_m\": 10.0,\
-    //     \"confidence_threshold\" : 0.5,\
-    // },\
-    // }";
-
-    // std::string config = "{\
-    //     \"streams\": [{\"name\":\"depth_raw\", \"max_fps\": 30.0},],\
-    // \"depth\":\
-    // {\
-    //     \"padding_factor\": 0.3,\
-    //     \"depth_limit_m\": 10.0,\
-    //     \"confidence_threshold\" : 0.5,\
-    // },\
-    // }";
-
-std::string config = "{streams: [left, right],}";
-
-    std::ifstream myFile("../config.json");
-    std::ostringstream tmp;
-    tmp << myFile.rdbuf();
-    config = tmp.str();
-
-
-    Device d("", true);
-    cout << "------------found---------" << endl;
-    cout << config << endl;
-    std::shared_ptr<CNNHostPipeline> pipeline = d.create_pipeline(config);
-
-    std::tuple<
-        std::list<std::shared_ptr<NNetPacket>>,
-        std::list<std::shared_ptr<HostDataPacket>>> packets; 
-        int i = 0;
-while(true){
-        packets = pipeline->getAvailableNNetAndDataPackets(true);
-        
-        for(auto sub_packet :  get<1>(packets)){
-                cout << sub_packet->stream_name <<"::-------::" << sub_packet->size() <<endl;
-        }
-    i++;
-    if(i == 10)
-    break;
-}
-    int wait;
-    cin >> wait;
 
     return 0;
 }

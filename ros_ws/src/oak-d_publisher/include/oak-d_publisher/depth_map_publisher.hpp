@@ -18,7 +18,7 @@ class DepthMapPublisher:
 
     ~DepthMapPublisher();
 
-    create_pipeline();
+    // create_pipeline();
 
     publisher();
 
