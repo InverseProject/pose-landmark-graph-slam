@@ -34,6 +34,8 @@ class DepthMapPublisher:
     std::string _landmark_topic;
 
     ros::Publisher _depth_map_pub;
-    
-
+    std::shared_ptr<CNNHostPipeline> _pipeline;
+    std::tuple<
+        std::list<std::shared_ptr<NNetPacket>>,
+        std::list<std::shared_ptr<HostDataPacket>>> _packets;
 };
