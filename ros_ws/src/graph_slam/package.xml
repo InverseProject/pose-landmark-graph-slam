@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>depthmap_to_pointcloud</name>
+  <name>graph_slam</name>
   <version>0.0.0</version>
-  <description>The depthmap_to_pointcloud package</description>
+  <description>The graph_slam package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/depthmap_to_pointcloud</url> -->
+  <!-- <url type="website">http://wiki.ros.org/graph_slam</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -55,6 +55,7 @@
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
 
+  <depend>opencv3</depend>
   <depend>eigen</depend>
   <depend>pcl_ros</depend>
 
