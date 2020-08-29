@@ -23,12 +23,18 @@ public:
 private:
 
     // Input parameters
-    float distance_threshold = 0.05; // in meters
-    float rotation_threshold = 0.1; // in radians (~ 5 deg)
+    float distance_threshold_ = 0.05; // in meters
+    float rotation_threshold_ = 0.1; // in radians (~ 5 deg)
 
     // Current variables
     nav_msgs::Odometry prev_odom_msg_published_;
-    
+
+    // Publishers
+    ros::Publisher throttled_odom_pub_;
+
+    // Subscribers
+    ros::Subscriber odom_sub_;
+
 };
 
 }  // namespace turtlebot_interface
