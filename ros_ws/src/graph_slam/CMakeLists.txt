@@ -137,7 +137,7 @@ add_definitions(${PCL_DEFINITIONS})
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  lib/inverse_perspective_projection.cpp
+  lib/depthmap_to_pointcloud_converter.cpp
 )
 
 
@@ -159,8 +159,8 @@ target_link_libraries(${PROJECT_NAME}
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/graph_slam_node.cpp)
-add_executable(inverse_projection_test_node
-  src/inverse_projection_test_node.cpp
+add_executable(depth_to_pc_test_node
+  src/depth_to_pc_test_node.cpp
 )
 
 ## Rename C++ executable without prefix
@@ -173,7 +173,7 @@ add_executable(inverse_projection_test_node
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(inverse_projection_test_node
+add_dependencies(depth_to_pc_test_node
   ${catkin_EXPORTED_TARGETS}
 )
 
@@ -183,10 +183,8 @@ add_dependencies(inverse_projection_test_node
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(inverse_projection_test_node
+target_link_libraries(depth_to_pc_test_node
   ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-  ${Eigen_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${PROJECT_NAME}
 )
