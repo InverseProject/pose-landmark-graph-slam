@@ -206,6 +206,23 @@ target_link_libraries(publish_pointcloud_from_depthmap_node
   ${PROJECT_NAME}
 )
 
+add_executable(publish_pointcloud_from_depthmap_node
+  src/publish_pointcloud_from_depthmap_node.cpp
+)
+
+add_dependencies(publish_pointcloud_from_depthmap_node
+  ${catkin_EXPORTED_TARGETS}
+)
+
+#TODO(sean): Change this to what worked for the test node
+target_link_libraries(publish_pointcloud_from_depthmap_node
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+  ${Eigen_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ${PROJECT_NAME}
+)
+
 #############
 ## Install ##
 #############
