@@ -64,7 +64,7 @@ public:
     Eigen::Matrix3Xf inverse_project_depthmap_into_3d(cv::Mat& depthmap);
     
     /**
-     * This function takes 2D depth map and returns as a collection of point clouds using pcl library
+     * This function takes 2D depth map and returns a pcl point cloud
      * 
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
      * @param subsample_factor (const int) : subsample factor enables   
@@ -81,10 +81,10 @@ public:
     */
     void save_pointcloud_to_pcd(cv::Mat& depthmap, const std::string& save_file_path, const int& subsample_factor);
 
-    // upper bound of a depth value
+    // upper bound of a depth value in meters (m)
     static constexpr float depth_upper_limit = 65.535;
 
-    // lower bound of a depth value 
+    // lower bound of a depth value in meters (m)
     static constexpr float depth_lower_limit = .196;
 
 private:

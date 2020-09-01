@@ -5,8 +5,8 @@
 
 #include <graph_slam/depthmap_to_pointcloud_converter.h>
 
-namespace graph_slam{
-
+namespace graph_slam
+{
 
 DepthmapToPointCloudConverter::DepthmapToPointCloudConverter(
     const Eigen::Matrix3f& intrinsics) :
@@ -36,27 +36,27 @@ Eigen::Matrix3Xf DepthmapToPointCloudConverter::inverse_project_depthmap_into_3d
     int total_pixels = depthmap_col * depthmap_row;
 
     // creating column index vector : resulting in a row vector (1,total_pixels)
-    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> col_idx_flat_mtrx = 
+    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> col_idx_flat_row_vec = 
         Eigen::RowVectorXf::LinSpaced(depthmap_col, 0, depthmap_col-1).replicate(depthmap_row, 1);
-    col_idx_flat_mtrx.resize(1,total_pixels);
+    col_idx_flat_row_vec.resize(1,total_pixels);
     
     // creating row index vector : resulting in a row vector (1,total_pixels)
-    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> row_idx_flat_mtrx = 
+    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> row_idx_flat_row_vec = 
         Eigen::VectorXf::LinSpaced(depthmap_row, 0, depthmap_row-1).replicate(1, depthmap_col);
-    row_idx_flat_mtrx.resize(1,total_pixels);
+    row_idx_flat_row_vec.resize(1,total_pixels);
 
     // creating row matrix filled with ones : resulting in a row vector (1,total_pixels)
-    auto one_flat_mtrx = Eigen::MatrixXf::Ones(1, total_pixels);
+    auto one_flat_row_vec = Eigen::MatrixXf::Ones(1, total_pixels);
 
-    // getting depth value inside a 2D depth map as a row verctor (1,total_pixels)
-    Eigen::MatrixXf depth_flat_mtrx = convert_depthmap_to_eigen_row_matrix(depthmap);
+    // getting depth value inside a 2D depth map as a row vector (1,total_pixels)
+    Eigen::MatrixXf depth_flat_row_vec = convert_depthmap_to_eigen_row_matrix(depthmap);
 
     Eigen::Matrix3Xf points(3, total_pixels);
-    points.row(0) = col_idx_flat_mtrx;
-    points.row(1) = row_idx_flat_mtrx;
-    points.row(2) = one_flat_mtrx;
+    points.row(0) = col_idx_flat_row_vec;
+    points.row(1) = row_idx_flat_row_vec;
+    points.row(2) = one_flat_row_vec;
 
-    return intrinsics_.inverse() * points * depth_flat_mtrx.asDiagonal();
+    return intrinsics_.inverse() * points * depth_flat_row_vec.asDiagonal();
 }
 
 pcl::PointCloud<pcl::PointXYZ> DepthmapToPointCloudConverter::get_pcl_pointcloud(
@@ -71,7 +71,7 @@ pcl::PointCloud<pcl::PointXYZ> DepthmapToPointCloudConverter::get_pcl_pointcloud
     int total_points = points_3d.cols();
 
     // reserve memory space for optimization
-    cloud.reserve(total_points);
+    cloud.reserve(static_cast<int>(total_points/subsample_factor));
 
     for(int i=0; i<total_points; i+=subsample_factor)
     {

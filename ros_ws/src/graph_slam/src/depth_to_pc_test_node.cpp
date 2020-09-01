@@ -11,6 +11,10 @@ cv::Mat load_depth_map(std::string file_path)
 
 int main(int argc, char** argv)
 {
+    /*
+     * TODO : load a K from .yaml file stored in config/intrinsics.yaml
+    */
+
     // create a mock intrinsic matrix
     Eigen::Matrix3f mock_K;
     mock_K << 851.67697279, 0.0, 628.07270979,
