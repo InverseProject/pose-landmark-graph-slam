@@ -1,9 +1,11 @@
 #include <string>
+#include <vector>
 #include <opencv2/opencv.hpp>
+#include <ros/ros.h>
 
 #include <graph_slam/depthmap_to_pointcloud_converter.h>
 
-cv::Mat load_depth_map(std::string file_path)
+cv::Mat load_depthmap(std::string file_path)
 {
     cv::Mat depth_map = cv::imread(file_path, CV_LOAD_IMAGE_UNCHANGED);
     return depth_map;
@@ -11,24 +13,39 @@ cv::Mat load_depth_map(std::string file_path)
 
 int main(int argc, char** argv)
 {
-    /*
-     * TODO : load a K from .yaml file stored in config/intrinsics.yaml
-    */
+    ros::init(argc, argv, "depth_to_pc_test_node");
+    ros::NodeHandle nh;
+    ros::NodeHandle pnh("~");
 
-    // create a mock intrinsic matrix
-    Eigen::Matrix3f mock_K;
-    mock_K << 851.67697279, 0.0, 628.07270979,
-            0.0, 855.55430548, 354.57494198,
-            0.0, 0.0, 1.0;
+    std::vector<float> intrinsics;
+    int subsample_factor = 1;
+    std::string depthmap_path = "";
+    std::string pcd_save_path = "";
 
-    // load a mock depth map
-    std::string image_path = "/home/sean/Desktop/pose-landmark-graph-slam/ros_ws/src/graph_slam/test/test_maps_293.png";
-    cv::Mat mock_depth_map = load_depth_map(image_path);
+    int bad_params = 0;
 
-    // create a inverse projection object
-    graph_slam::DepthmapToPointCloudConverter mock_object(mock_K);
+    bad_params += !pnh.getParam("/intrinsic_matrix", intrinsics);
+    bad_params += !pnh.getParam("subsample_factor", subsample_factor);
+    bad_params += !pnh.getParam("depthmap_path", depthmap_path);
+    bad_params += !pnh.getParam("pcd_save_path", pcd_save_path);
+
+
+    if(bad_params > 0)
+    {
+        std::cout << "Setting one or more parameters failed. Program exiting." << std::endl;
+        return 1;
+    }
     
-    mock_object.save_pointcloud_to_pcd(mock_depth_map, "/home/sean/Desktop/pose-landmark-graph-slam/ros_ws/src/graph_slam/test/", 1);
+    Eigen::Matrix3f intrinsics_eigen = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
+
+    cv::Mat mock_depth_map = load_depthmap(depthmap_path);
+
+    graph_slam::DepthmapToPointCloudConverter convert_depthmap_to_pc(intrinsics_eigen);
+    
+    convert_depthmap_to_pc.save_pointcloud_to_pcd(
+        mock_depth_map,
+        pcd_save_path,
+        subsample_factor);
 
     return 0;
 }
