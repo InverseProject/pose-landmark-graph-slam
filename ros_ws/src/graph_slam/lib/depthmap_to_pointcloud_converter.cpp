@@ -71,7 +71,7 @@ pcl::PointCloud<pcl::PointXYZ> DepthmapToPointCloudConverter::get_pcl_pointcloud
     int total_points = points_3d.cols();
 
     // reserve memory space for optimization
-    cloud.reserve(static_cast<int>(total_points/subsample_factor));
+    cloud.reserve(total_points);
 
     for(int i=0; i<total_points; i+=subsample_factor)
     {
@@ -84,6 +84,7 @@ pcl::PointCloud<pcl::PointXYZ> DepthmapToPointCloudConverter::get_pcl_pointcloud
     cloud.width = valid_points_cnt;
     cloud.height = 1;
     cloud.is_dense = true;
+    cloud.resize(valid_points_cnt);
 
     return cloud;
 }

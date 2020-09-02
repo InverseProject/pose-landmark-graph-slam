@@ -14,7 +14,6 @@ cv::Mat load_depthmap(std::string file_path)
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "depth_to_pc_test_node");
-    ros::NodeHandle nh;
     ros::NodeHandle pnh("~");
 
     std::vector<float> intrinsics;
@@ -24,7 +23,7 @@ int main(int argc, char** argv)
 
     int bad_params = 0;
 
-    bad_params += !pnh.getParam("/intrinsic_matrix", intrinsics);
+    bad_params += !pnh.getParam("intrinsic_matrix", intrinsics);
     bad_params += !pnh.getParam("subsample_factor", subsample_factor);
     bad_params += !pnh.getParam("depthmap_path", depthmap_path);
     bad_params += !pnh.getParam("pcd_save_path", pcd_save_path);
@@ -37,6 +36,7 @@ int main(int argc, char** argv)
     }
     
     Eigen::Matrix3f intrinsics_eigen = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
+    std::cout << intrinsics_eigen << std::endl;
 
     cv::Mat mock_depth_map = load_depthmap(depthmap_path);
 

@@ -10,7 +10,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include <graph_slam/inverse_perspective_projection.h>
+#include <graph_slam/depthmap_to_pointcloud_converter.h>
 
 namespace graph_slam
 {
@@ -23,7 +23,8 @@ public:
         const std::string& in_odom_topic,
         const std::string& in_depthmap_topic,
         const std::string& out_cloud_topic,
-        const Eigen::Matrix3Xf& intrinsics_matrix);
+        const Eigen::Matrix3Xf& intrinsics_matrix,
+        int subsample_factor);
 
     ~NodePublishPointcloudFromDepthmap();
 
@@ -32,6 +33,11 @@ public:
         const sensor_msgs::ImageConstPtr& depthmap_msg);
 
 private:
+    // Camera intrisincis
+    Eigen::Matrix3Xf intrinsics_matrix_;
+    
+    // Subsample factor
+    int subsample_factor_ = 1;
 
     // Setup subscribers
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub_;
@@ -45,7 +51,7 @@ private:
     std::shared_ptr<Sync_> sync_;
 
     // Depth to cloud converter object
-    std::shared_ptr<InverseProjection> inverse_projection_;
+    std::shared_ptr<DepthmapToPointCloudConverter> depthmap_to_pc_converter_;
 
     // Setup publisher
     ros::Publisher cloud_pub_;
