@@ -53,7 +53,7 @@ void DepthMapPublisher::publisher(){
     // unsigned char* depth_data = reinterpret_cast<unsigned char*>(img_data.data());
     
     cv::Mat img_data = cv::Mat(720,1280 , CV_16U);
-    unsigned char* depth_data = reinterpret_cast<unsigned char*>(m.data);
+    unsigned char* depth_data = reinterpret_cast<unsigned char*>(img_data.data);
     // m.data
     while(ros::ok()){
 
