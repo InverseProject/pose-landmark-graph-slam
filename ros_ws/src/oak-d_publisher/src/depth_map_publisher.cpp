@@ -23,7 +23,7 @@ DepthMapPublisher::DepthMapPublisher(
             _depth_map_topic(depth_map_topic),
             _landmark_topic(landmark_topic){
 
-    ros::init(argc, argv, "oak_publisher");
+    
     ros::NodeHandle n;
     ros::Rate loop_rate(rate);
 
@@ -57,7 +57,7 @@ void DepthMapPublisher::publisher(){
     // m.data
     while(ros::ok()){
 
-        _packets = pipeline->getAvailableNNetAndDataPackets(true);
+        _packets = _pipeline->getAvailableNNetAndDataPackets(true);
         std::list<std::shared_ptr<HostDataPacket>> host_packet = get<1>(packets);
     
         for(auto sub_packet :  host_packet){
@@ -79,7 +79,9 @@ void DepthMapPublisher::publisher(){
 
 
 
-int main(){
+int main(int argc, char** argv){
+    ros::init(argc, argv, "oak_publisher");
+
 
 
     return 0;
