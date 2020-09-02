@@ -28,7 +28,7 @@ void DepthmapToPointCloudConverter::set_intrinsics(
 }
 
 Eigen::Matrix3Xf DepthmapToPointCloudConverter::inverse_project_depthmap_into_3d(
-    cv::Mat& depthmap)
+    const cv::Mat& depthmap)
 {
     // depthmap's size of column (width), row (height), and total number of pixels
     int depthmap_col = depthmap.cols;
@@ -56,12 +56,13 @@ Eigen::Matrix3Xf DepthmapToPointCloudConverter::inverse_project_depthmap_into_3d
     points.row(1) = row_idx_flat_row_vec;
     points.row(2) = one_flat_row_vec;
 
+    // TODO : optimize this line instead of multiplying (N,N) diagonal matrix
     return intrinsics_.inverse() * points * depth_flat_row_vec.asDiagonal();
 }
 
 pcl::PointCloud<pcl::PointXYZ> DepthmapToPointCloudConverter::get_pcl_pointcloud(
-    cv::Mat& depthmap,
-    const int& subsample_factor = 1)
+    const cv::Mat& depthmap,
+    int subsample_factor = 1)
 {
     pcl::PointCloud<pcl::PointXYZ> cloud;
     
@@ -71,7 +72,7 @@ pcl::PointCloud<pcl::PointXYZ> DepthmapToPointCloudConverter::get_pcl_pointcloud
     int total_points = points_3d.cols();
 
     // reserve memory space for optimization
-    cloud.reserve(static_cast<int>(total_points/subsample_factor));
+    cloud.reserve(total_points);
 
     for(int i=0; i<total_points; i+=subsample_factor)
     {
@@ -84,14 +85,15 @@ pcl::PointCloud<pcl::PointXYZ> DepthmapToPointCloudConverter::get_pcl_pointcloud
     cloud.width = valid_points_cnt;
     cloud.height = 1;
     cloud.is_dense = true;
+    cloud.resize(valid_points_cnt);
 
     return cloud;
 }
 
 void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
-    cv::Mat& depthmap,
+    const cv::Mat& depthmap,
     const std::string& save_file_path,
-    const int& subsample_factor = 1)
+    int subsample_factor = 1)
 {
     if(save_file_path.empty()){
         std::cout << "Please specify the stored path. Job Aborted." << std::endl;
@@ -105,11 +107,8 @@ void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
 }
 
 Eigen::MatrixXf DepthmapToPointCloudConverter::convert_depthmap_to_eigen_row_matrix(
-    cv::Mat& depthmap)
+    const cv::Mat& depthmap)
 {
-    // make depth values to be 32-bit float
-    depthmap.convertTo(depthmap, CV_32F);
-
     Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> mtrx;
     cv::cv2eigen(depthmap, mtrx);
     Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> row_mtrx = mtrx;

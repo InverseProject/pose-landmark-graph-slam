@@ -61,25 +61,25 @@ public:
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
      * @return (Eigen::Matrix3Xf) : (3,N) matrix where it contains N nubmer of points of (x,y,z)
     */
-    Eigen::Matrix3Xf inverse_project_depthmap_into_3d(cv::Mat& depthmap);
+    Eigen::Matrix3Xf inverse_project_depthmap_into_3d(const cv::Mat& depthmap);
     
     /**
      * This function takes 2D depth map and returns a pcl point cloud
      * 
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
-     * @param subsample_factor (const int) : subsample factor enables   
+     * @param subsample_factor (int) : subsample factor enables sub sampling entire point cloud
      * @return (pcl::PointCloud<pcl::PointXYZ>) : 3D point clouds in pcl
     */
-    pcl::PointCloud<pcl::PointXYZ> get_pcl_pointcloud(cv::Mat& depthmap, const int& subsample_factor);
+    pcl::PointCloud<pcl::PointXYZ> get_pcl_pointcloud(const cv::Mat& depthmap, int subsample_factor);
     
     /**
      * This function saves converted point clouds into pcd format  
      * 
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
      * @param save_file_path (std::string) : path to store point clouds as pcd. If 
-     * @param 
+     * @param subsample_factor (int) : subsample factor enables sub sampling entire point cloud
     */
-    void save_pointcloud_to_pcd(cv::Mat& depthmap, const std::string& save_file_path, const int& subsample_factor);
+    void save_pointcloud_to_pcd(const cv::Mat& depthmap, const std::string& save_file_path, int subsample_factor);
 
     // upper bound of a depth value in meters (m)
     static constexpr float depth_upper_limit = 65.535;
@@ -99,7 +99,7 @@ private:
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
      * @return (Eigen::MatrixXf) : (1,N) flattened matrix
     */
-    Eigen::MatrixXf convert_depthmap_to_eigen_row_matrix(cv::Mat& depthmap);
+    Eigen::MatrixXf convert_depthmap_to_eigen_row_matrix(const cv::Mat& depthmap);
 };
 
 } // namespace graph_slam
