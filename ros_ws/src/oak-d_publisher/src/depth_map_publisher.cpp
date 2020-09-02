@@ -52,7 +52,7 @@ void DepthMapPublisher::publisher(){
     // vector<uint16_t> img_data(720*1280, 0);    
     // unsigned char* depth_data = reinterpret_cast<unsigned char*>(img_data.data());
     
-    cv::Mat img_data = cv::Mat(720,1280 , CV_16U)
+    cv::Mat img_data = cv::Mat(720,1280 , CV_16U);
     unsigned char* depth_data = reinterpret_cast<unsigned char*>(m.data);
     // m.data
     while(ros::ok()){
@@ -61,7 +61,7 @@ void DepthMapPublisher::publisher(){
         std::list<std::shared_ptr<HostDataPacket>> host_packet = get<1>(packets);
     
         for(auto sub_packet :  host_packet){
-            std::cout << "Stream name ::------->" << sub_packet->stream_name << std::endl
+            std::cout << "Stream name ::------->" << sub_packet->stream_name << std::endl;
             if(sub_packet->stream_name == "depth_raw"){
                 auto received_data = sub_packet->getData();
                 memcpy(depth_data, received_data, sub_packet->size());
