@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(oak-d_publisher)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,7 +6,13 @@ project(oak-d_publisher)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
+#add_subdirectory(depthai-core)
+#add_subdirectory(depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_FROM_ALL)
+
+
 add_compile_options(-std=c++11)
+project(oak-d_publisher)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -21,6 +26,9 @@ find_package(catkin REQUIRED COMPONENTS
 # find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(OpenCV)
+
+#find_package(depthai)
+
 
 
 catkin_package(
@@ -36,13 +44,16 @@ catkin_package(
 ## Build ##
 ###########
 message("Project---->  ${CMAKE_CURRENT_LIST_DIR} ========= ${CMAKE_CURRENT_BINARY_DIR}....------> ")
+message(${catkin_INCLUDE_DIRS})
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+ # /usr/local/include/depthai/
 )
 
+#${depthai_INCLUDE_DIRS}
 
 add_executable(${PROJECT_NAME}_node
   src/depth_map_publisher.cpp
