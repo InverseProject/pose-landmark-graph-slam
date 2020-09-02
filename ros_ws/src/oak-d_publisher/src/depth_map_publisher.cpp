@@ -39,7 +39,7 @@ DepthMapPublisher::DepthMapPublisher(
 }
 
 
-DepthMapPublisher::publisher(){
+void DepthMapPublisher::publisher(){
     
     cv_bridge::CvImage out_msg;
     

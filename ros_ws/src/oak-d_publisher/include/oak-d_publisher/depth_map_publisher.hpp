@@ -14,7 +14,8 @@ class DepthMapPublisher
     DepthMapPublisher(
             const std::string& config_file_path,
             const std::string& depth_map_topic,
-            const std::string& landmark_topic);
+            const std::string& landmark_topic,
+            const int rate);
 
     ~DepthMapPublisher();
 
