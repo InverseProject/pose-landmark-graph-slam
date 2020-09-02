@@ -8,6 +8,9 @@
 #include "std_msgs/String.h"
 #include "oak-d_publisher/depth_map_publisher.hpp"
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
+#include <cv_bridge/cv_bridge.h>
+
 
 using namespace std;
     
@@ -38,18 +41,34 @@ DepthMapPublisher::DepthMapPublisher(
 
 DepthMapPublisher::publisher(){
     
+    cv_bridge::CvImage out_msg;
+    
+    out_msg.encoding = sensor_msgs::image_encodings::TYPE_16U1; // Or whatever
+    // out_msg.image    = sal_float_image; // Your cv::Mat
+
+
     sensor_msgs::Image depth_map;
     depth_map.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
-
+    // vector<uint16_t> img_data(720*1280, 0);    
+    // unsigned char* depth_data = reinterpret_cast<unsigned char*>(img_data.data());
+    
+    cv::Mat img_data = cv::Mat(rows, cols, CV_16U1)
+    unsigned char* depth_data = reinterpret_cast<unsigned char*>(m.data);
+    // m.data
     while(ros::ok()){
 
         _packets = pipeline->getAvailableNNetAndDataPackets(true);
         std::list<std::shared_ptr<HostDataPacket>> host_packet = get<1>(packets);
-        
+    
         for(auto sub_packet :  host_packet){
             std::cout << "Stream name ::------->" << sub_packet->stream_name << std::endl
             if(sub_packet->stream_name == "depth_raw"){
-
+                auto received_data = sub_packet->getData();
+                memcpy(depth_data, received_data, sub_packet->size());
+                out_msg.header.stamp = ros::Time::now();
+                out_msg.header.frame_id = "depth map";
+                out_msg.image = img_data;
+                _depth_map_pub.publish(out_msg.toImageMsg());
             }
          }
 
