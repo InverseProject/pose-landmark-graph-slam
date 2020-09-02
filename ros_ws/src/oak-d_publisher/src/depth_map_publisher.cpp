@@ -43,7 +43,7 @@ void DepthMapPublisher::publisher(){
     
     cv_bridge::CvImage out_msg;
     
-    out_msg.encoding = sensor_msgs::image_encodings::TYPE_16U1; // Or whatever
+    out_msg.encoding = sensor_msgs::image_encodings::MONO16 ; // Or whatever
     // out_msg.image    = sal_float_image; // Your cv::Mat
 
 
