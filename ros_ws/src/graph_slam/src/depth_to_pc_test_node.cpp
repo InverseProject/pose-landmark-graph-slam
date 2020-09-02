@@ -39,6 +39,7 @@ int main(int argc, char** argv)
     std::cout << intrinsics_eigen << std::endl;
 
     cv::Mat mock_depth_map = load_depthmap(depthmap_path);
+    mock_depth_map.convertTo(mock_depth_map, CV_32F);
 
     graph_slam::DepthmapToPointCloudConverter convert_depthmap_to_pc(intrinsics_eigen);
     
