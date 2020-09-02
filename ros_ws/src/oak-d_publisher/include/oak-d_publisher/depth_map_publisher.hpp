@@ -7,7 +7,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
-class DepthMapPublisher:
+class DepthMapPublisher
 {
 
     public:
@@ -20,7 +20,7 @@ class DepthMapPublisher:
 
     // create_pipeline();
 
-    publisher();
+    void publisher();
 
 
     private:
