@@ -7,6 +7,8 @@ project(oak-d_publisher)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+add_compile_options(-std=c++11)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
@@ -18,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV)
 
 
 catkin_package(
