@@ -110,7 +110,7 @@ DepthmapToPointCloudConverter::convert_depthmap_to_eigen_row_matrix(const cv::Ma
     row_mtrx.resize(1, depthmap.rows * depthmap.cols);
 
     // mm to m conversion
-    row_mtrx /= 1000;
+    row_mtrx /= 1000.0;
 
     return row_mtrx;
 }
