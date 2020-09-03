@@ -69,6 +69,8 @@ void DepthMapPublisher::publisher(){
                 out_msg.header.frame_id = "depth map";
                 out_msg.image = img_data;
                 _depth_map_pub.publish(out_msg.toImageMsg());
+                ros::spinOnce();
+
             }
          }
 
@@ -82,7 +84,8 @@ void DepthMapPublisher::publisher(){
 int main(int argc, char** argv){
     ros::init(argc, argv, "oak_publisher");
 
-
-
+    DepthMapPublisher oak("./config/config.json", "depth_map", "landmark", 10);
+    oak.publisher();
+          
     return 0;
 }
