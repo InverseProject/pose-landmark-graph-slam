@@ -2,8 +2,8 @@
 
 #include <Eigen/Dense>
 #include <opencv2/core/core.hpp>
-#include <pcl/impl/point_types.hpp>
 #include <pcl/io/pcd_io.h>
+#include <pcl/impl/point_types.hpp>
 #include <string>
 
 namespace graph_slam
