@@ -6,12 +6,10 @@ namespace turtlebot_interface
 {
 
 NodeOdometryThrottle::NodeOdometryThrottle(
-    const std::string& in_odom_topic,
-    const std::string& out_odom_topic,
-    float distance_threshold,
+    const std::string& in_odom_topic, const std::string& out_odom_topic, float distance_threshold,
     float rotation_threshold) :
-    distance_threshold_(distance_threshold),
-    rotation_threshold_(rotation_threshold)
+      distance_threshold_(distance_threshold),
+      rotation_threshold_(rotation_threshold)
 {
     ros::NodeHandle nh;
 
@@ -24,8 +22,7 @@ NodeOdometryThrottle::NodeOdometryThrottle(
 
 NodeOdometryThrottle::~NodeOdometryThrottle() = default;
 
-void NodeOdometryThrottle::Callback(
-    const nav_msgs::OdometryConstPtr& odom_msg)
+void NodeOdometryThrottle::Callback(const nav_msgs::OdometryConstPtr& odom_msg)
 {
     if (!odom_published_at_least_once_)
     {
@@ -42,22 +39,18 @@ void NodeOdometryThrottle::Callback(
     }
 }
 
-bool NodeOdometryThrottle::ExceedsThresholds(
-    const nav_msgs::OdometryConstPtr& odom_msg)
+bool NodeOdometryThrottle::ExceedsThresholds(const nav_msgs::OdometryConstPtr& odom_msg)
 {
     // Compare poses
     Eigen::Vector3f prev_pose, curr_pose;
 
-    curr_pose << 
-        odom_msg->pose.pose.position.x,
-        odom_msg->pose.pose.position.y,
+    curr_pose << odom_msg->pose.pose.position.x, odom_msg->pose.pose.position.y,
         odom_msg->pose.pose.position.z;
-    
-    prev_pose <<
-        prev_odom_msg_published_.pose.pose.position.x,
+
+    prev_pose << prev_odom_msg_published_.pose.pose.position.x,
         prev_odom_msg_published_.pose.pose.position.y,
         prev_odom_msg_published_.pose.pose.position.z;
-    
+
     float distance = (curr_pose - prev_pose).norm();
     if (distance >= distance_threshold_)
     {
@@ -66,11 +59,9 @@ bool NodeOdometryThrottle::ExceedsThresholds(
 
     // Compare rotations
     Eigen::Quaternionf curr_quat = Eigen::Quaternionf(
-        odom_msg->pose.pose.orientation.w,
-        odom_msg->pose.pose.orientation.x,
-        odom_msg->pose.pose.orientation.y,
-        odom_msg->pose.pose.orientation.z);
-    
+        odom_msg->pose.pose.orientation.w, odom_msg->pose.pose.orientation.x,
+        odom_msg->pose.pose.orientation.y, odom_msg->pose.pose.orientation.z);
+
     Eigen::Quaternionf prev_quat = Eigen::Quaternionf(
         prev_odom_msg_published_.pose.pose.orientation.w,
         prev_odom_msg_published_.pose.pose.orientation.x,
@@ -90,7 +81,6 @@ bool NodeOdometryThrottle::ExceedsThresholds(
     return false;
 }
 
-    
 }  // namespace turtlebot_interface
 
 int main(int argc, char** argv)
@@ -118,11 +108,8 @@ int main(int argc, char** argv)
     }
 
     turtlebot_interface::NodeOdometryThrottle node_odom_throttle(
-        in_odom_topic,
-        out_odom_topic,
-        distance_threshold,
-        rotation_threshold);
-    
+        in_odom_topic, out_odom_topic, distance_threshold, rotation_threshold);
+
     ros::spin();
     return 0;
 }
