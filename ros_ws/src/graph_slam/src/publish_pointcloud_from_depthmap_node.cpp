@@ -7,13 +7,11 @@ namespace graph_slam
 {
 
 NodePublishPointcloudFromDepthmap::NodePublishPointcloudFromDepthmap(
-    const std::string& in_odom_topic,
-    const std::string& in_depthmap_topic,
-    const std::string& out_cloud_topic,
-    const Eigen::Matrix3Xf& intrinsics_matrix,
+    const std::string& in_odom_topic, const std::string& in_depthmap_topic,
+    const std::string& out_cloud_topic, const Eigen::Matrix3Xf& intrinsics_matrix,
     int subsample_factor) :
-    subsample_factor_(subsample_factor),
-    intrinsics_matrix_(intrinsics_matrix)
+      subsample_factor_(subsample_factor),
+      intrinsics_matrix_(intrinsics_matrix)
 {
     ros::NodeHandle nh;
 
@@ -23,26 +21,22 @@ NodePublishPointcloudFromDepthmap::NodePublishPointcloudFromDepthmap(
 
     sync_.reset(new Sync_(SyncPolicy_(10), odom_sub_, depthmap_sub_));
     sync_->registerCallback(
-        boost::bind(
-            &NodePublishPointcloudFromDepthmap::Callback, this, _1, _2));
-    
+        boost::bind(&NodePublishPointcloudFromDepthmap::Callback, this, _1, _2));
+
     // Setup DepthmapToPointCloudConverter object
-    depthmap_to_pc_converter_ =
-        std::make_shared<DepthmapToPointCloudConverter>(intrinsics_matrix);
+    depthmap_to_pc_converter_ = std::make_shared<DepthmapToPointCloudConverter>(intrinsics_matrix);
 
     // Setup Publishers
     cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>(out_cloud_topic, 5);
 }
 
-NodePublishPointcloudFromDepthmap::~NodePublishPointcloudFromDepthmap()
-     = default;
+NodePublishPointcloudFromDepthmap::~NodePublishPointcloudFromDepthmap() = default;
 
 void NodePublishPointcloudFromDepthmap::Callback(
-    const nav_msgs::OdometryConstPtr& odom_msg,
-    const sensor_msgs::ImageConstPtr& depthmap_msg)
+    const nav_msgs::OdometryConstPtr& odom_msg, const sensor_msgs::ImageConstPtr& depthmap_msg)
 {
     // Create cloud from depthmap
-    
+
     // depthmap_to_pc_converter_.get_pcl_pointcloud();
 
     // Create ROS PointCloud2 message
@@ -50,11 +44,9 @@ void NodePublishPointcloudFromDepthmap::Callback(
     // Change PointCloud2's timestamp to odom's timestamp
 
     // Publish PointCloud2 message
-
 }
 
 }  // namespace graph_slam
-
 
 int main(int argc, char** argv)
 {
@@ -85,11 +77,7 @@ int main(int argc, char** argv)
     Eigen::Matrix3f intrinsics_matrix = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
 
     graph_slam::NodePublishPointcloudFromDepthmap node_odom_throttle(
-        in_odom_topic,
-        in_depthmap_topic,
-        out_cloud_topic,
-        intrinsics_matrix,
-        subsample_factor);
+        in_odom_topic, in_depthmap_topic, out_cloud_topic, intrinsics_matrix, subsample_factor);
 
     ros::spin();
     return 0;
