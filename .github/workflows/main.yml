@@ -1,0 +1,15 @@
+- name: clang-format lint
+  # You may pin to the exact commit or the version.
+  # uses: DoozyX/clang-format-lint-action@e885c632a5ce4da2198c0739e9b499b18c55187f
+  uses: DoozyX/clang-format-lint-action@v0.9
+  with:
+    # Source folder to check formatting
+    source: ros_ws/src
+    # Folder to exclude from formatting check
+    exclude: # optional, default is none
+    # List of extensions to check
+    extensions: # optional, default is c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx
+    # Version of clang-format
+    clangFormatVersion: # optional, default is 9
+    # Formatting style to use
+    style: # optional, default is file
