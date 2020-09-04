@@ -1,7 +1,7 @@
-#include <string>
-#include <vector>
 #include <opencv2/opencv.hpp>
 #include <ros/ros.h>
+#include <string>
+#include <vector>
 
 #include <graph_slam/depthmap_to_pointcloud_converter.h>
 
@@ -28,13 +28,12 @@ int main(int argc, char** argv)
     bad_params += !pnh.getParam("depthmap_path", depthmap_path);
     bad_params += !pnh.getParam("pcd_save_path", pcd_save_path);
 
-
-    if(bad_params > 0)
+    if (bad_params > 0)
     {
         std::cout << "Setting one or more parameters failed. Program exiting." << std::endl;
         return 1;
     }
-    
+
     Eigen::Matrix3f intrinsics_eigen = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
     std::cout << intrinsics_eigen << std::endl;
 
@@ -42,11 +41,8 @@ int main(int argc, char** argv)
     mock_depth_map.convertTo(mock_depth_map, CV_32F);
 
     graph_slam::DepthmapToPointCloudConverter convert_depthmap_to_pc(intrinsics_eigen);
-    
-    convert_depthmap_to_pc.save_pointcloud_to_pcd(
-        mock_depth_map,
-        pcd_save_path,
-        subsample_factor);
+
+    convert_depthmap_to_pc.save_pointcloud_to_pcd(mock_depth_map, pcd_save_path, subsample_factor);
 
     return 0;
 }

@@ -2,14 +2,14 @@
 <launch>
 
     <arg name="subsample_factor" default="1"/>
-    <arg name="depthmap_path" default="/home/sean/Desktop/pose-landmark-graph-slam/ros_ws/src/graph_slam/test/test_maps_293.png"/>
-    <arg name="pcd_save_path" default="/home/sean/Desktop/pose-landmark-graph-slam/ros_ws/src/graph_slam/test/"/>
+    <arg name="depthmap_path" default="$(find graph_slam)/test/test_maps_293.png"/>
+    <arg name="pcd_save_path" default="$(find graph_slam)/test/"/>
 
     <node pkg="graph_slam" name="depth_to_pc_test_node" type="depth_to_pc_test_node" output="screen">
         <rosparam file="$(find graph_slam)/config/intrinsics.yaml"/>
         <param name="subsample_factor" value="10"/>
-        <param name="depthmap_path" value="/home/sean/Desktop/pose-landmark-graph-slam/ros_ws/src/graph_slam/test/test_maps_293.png"/>
-        <param name="pcd_save_path" value="/home/sean/Desktop/pose-landmark-graph-slam/ros_ws/src/graph_slam/test/"/>
+        <param name="depthmap_path" value="$(arg depthmap_path)"/>
+        <param name="pcd_save_path" value="$(arg pcd_save_path)"/>
     </node>
 
 </launch>
