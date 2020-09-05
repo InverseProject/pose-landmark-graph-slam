@@ -77,7 +77,7 @@ void NodePublishPointcloudFromDepthmap::Callback(
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "sync_odom_camera_node");
+    ros::init(argc, argv, "publish_pointcloud_from_depthmap_node");
     ros::NodeHandle nh;
     ros::NodeHandle pnh("~");
 
