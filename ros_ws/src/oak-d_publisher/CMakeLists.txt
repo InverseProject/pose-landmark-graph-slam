@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 3.0.2)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 
-#add_subdirectory(depthai-core)
-#add_subdirectory(depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_FROM_ALL)
+# add_subdirectory(depthai-core)
+add_subdirectory(depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_FROM_ALL)
 
 
 add_compile_options(-std=c++11)
@@ -27,8 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(OpenCV)
 
-#find_package(depthai)
-
+# find_package(depthai-core)
 
 
 catkin_package(
@@ -50,7 +49,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
- # /usr/local/include/depthai/
+#  /usr/local/include/depthai/
 )
 
 #${depthai_INCLUDE_DIRS}
@@ -64,8 +63,12 @@ add_dependencies(${PROJECT_NAME}_node
 )
 
 target_link_libraries(${PROJECT_NAME}_node PUBLIC depthai-core
-  ${catkin_LIBRARIES}
+ ${catkin_LIBRARIES}
 )
+
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
 
 #---------------------------------------------------------------#
 ## Declare a C++ library

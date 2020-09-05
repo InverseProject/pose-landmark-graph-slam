@@ -3,8 +3,16 @@
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 cmake_minimum_required(VERSION 3.0.2)
-add_subdirectory(oak-d_publisher/depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_FROM_ALL)
+# add_subdirectory(oak-d_publisher/depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_FROM_ALL)
+set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
+include("cmake/HunterGate.cmake")
+HunterGate(
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.258.tar.gz"
+    SHA1 "062a19ab13ce8dffa9a882b6ce3e43bdabdf75d3"
+    LOCAL # Local config for dependencies
+)
 
+# hunter_add_package(catkin)
 
 project(Project)
 
