@@ -1,7 +1,12 @@
 #include <vector>
-#include <graph_slam/publish_pointcloud_from_depthmap_node.h>
-#include <ros/ros.h>
 #include <Eigen/Dense>
+#include <opencv2/core/core.hpp>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <ros/ros.h>
+#include <cv_bridge/cv_bridge.h>
+#include <graph_slam/publish_pointcloud_from_depthmap_node.h>
 
 namespace graph_slam
 {
@@ -35,15 +40,37 @@ NodePublishPointcloudFromDepthmap::~NodePublishPointcloudFromDepthmap() = defaul
 void NodePublishPointcloudFromDepthmap::Callback(
     const nav_msgs::OdometryConstPtr& odom_msg, const sensor_msgs::ImageConstPtr& depthmap_msg)
 {
-    // Create cloud from depthmap
+    // Convert ROS image to OpenCV image
+    cv_bridge::CvImagePtr cv_ptr;
+    try
+    {
+        cv_ptr = cv_bridge::toCvCopy(depthmap_msg, sensor_msgs::image_encodings::TYPE_16UC1);
+    }
+    catch (const cv_bridge::Exception& e)
+    {
+        std::cout << "Unable to convert sensor_msg using cv_bridge. Details: " << e.what()
+                  << std::endl;
+        return;
+    }
 
-    // depthmap_to_pc_converter_.get_pcl_pointcloud();
+    // Change the image value type from uint_16 to float_32
+    cv_ptr->image.convertTo(cv_ptr->image, CV_32F);
+
+    // Create cloud from depthmap
+    pcl::PointCloud<pcl::PointXYZ> pc_from_depth =
+        depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, subsample_factor_);
 
     // Create ROS PointCloud2 message
+    sensor_msgs::PointCloud2 points_to_publish;
+
+    // Convert obtained point cloud to ROS PointCloud2 message
+    pcl::toROSMsg(pc_from_depth, points_to_publish);
 
     // Change PointCloud2's timestamp to odom's timestamp
+    points_to_publish.header.stamp = odom_msg->header.stamp;
 
     // Publish PointCloud2 message
+    cloud_pub_.publish(points_to_publish);
 }
 
 }  // namespace graph_slam

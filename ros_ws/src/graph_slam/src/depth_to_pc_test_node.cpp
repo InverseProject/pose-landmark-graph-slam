@@ -35,7 +35,6 @@ int main(int argc, char** argv)
     }
 
     Eigen::Matrix3f intrinsics_eigen = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
-    std::cout << intrinsics_eigen << std::endl;
 
     cv::Mat mock_depth_map = load_depthmap(depthmap_path);
     mock_depth_map.convertTo(mock_depth_map, CV_32F);
