@@ -64,14 +64,16 @@ public:
     Eigen::Matrix3Xf inverse_project_depthmap_into_3d(const cv::Mat& depthmap);
 
     /**
-     * This function takes 2D depth map and returns a pcl point cloud
+     * This function takes 2D depth map and stores a pcl point cloud in output_pc
      *
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
+     * @param output_pc (pcl::PointCloud<pcl::PointXYZ>::Ptr&) : converted point cloud as a
      * @param subsample_factor (int) : subsample factor enables sub sampling entire point cloud
-     * @return (pcl::PointCloud<pcl::PointXYZ>) : 3D point clouds in pcl
+     * reference
      */
-    pcl::PointCloud<pcl::PointXYZ>
-    get_pcl_pointcloud(const cv::Mat& depthmap, int subsample_factor);
+    void get_pcl_pointcloud(
+        const cv::Mat& depthmap, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc,
+        int subsample_factor);
 
     /**
      * This function saves converted point clouds into pcd format

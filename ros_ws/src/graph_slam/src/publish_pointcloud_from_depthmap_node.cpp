@@ -15,8 +15,9 @@ NodePublishPointcloudFromDepthmap::NodePublishPointcloudFromDepthmap(
     const std::string& in_odom_topic, const std::string& in_depthmap_topic,
     const std::string& out_cloud_topic, const Eigen::Matrix3Xf& intrinsics_matrix,
     int subsample_factor) :
-      subsample_factor_(subsample_factor),
-      intrinsics_matrix_(intrinsics_matrix)
+      intrinsics_matrix_(intrinsics_matrix),
+      subsample_factor_(subsample_factor)
+
 {
     ros::NodeHandle nh;
 
@@ -57,17 +58,19 @@ void NodePublishPointcloudFromDepthmap::Callback(
     cv_ptr->image.convertTo(cv_ptr->image, CV_32F);
 
     // Create cloud from depthmap
-    pcl::PointCloud<pcl::PointXYZ> pc_from_depth =
-        depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, subsample_factor_);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pc_from_depth =
+        boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+
+    depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, pc_from_depth, subsample_factor_);
 
     // Create ROS PointCloud2 message
-    sensor_msgs::PointCloud2 points_to_publish;
+    sensor_msgs::PointCloud2Ptr points_to_publish;
 
     // Convert obtained point cloud to ROS PointCloud2 message
-    pcl::toROSMsg(pc_from_depth, points_to_publish);
+    pcl::toROSMsg(*pc_from_depth, *points_to_publish);
 
     // Change PointCloud2's timestamp to odom's timestamp
-    points_to_publish.header.stamp = odom_msg->header.stamp;
+    points_to_publish->header.stamp = odom_msg->header.stamp;
 
     // Publish PointCloud2 message
     cloud_pub_.publish(points_to_publish);
@@ -78,7 +81,6 @@ void NodePublishPointcloudFromDepthmap::Callback(
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "publish_pointcloud_from_depthmap_node");
-    ros::NodeHandle nh;
     ros::NodeHandle pnh("~");
 
     std::string in_odom_topic = "";
