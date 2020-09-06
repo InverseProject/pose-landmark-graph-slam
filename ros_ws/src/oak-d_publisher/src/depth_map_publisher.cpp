@@ -33,7 +33,7 @@ DepthMapPublisher::DepthMapPublisher(
     config_str = file_stream.str();
     _depth_map_pub = n.advertise<sensor_msgs::Image>(_depth_map_topic, 2);
 
-    oak = new Device("", true);
+    oak = new Device("", false);
     // std::cout << "Creating pipeline ---------------->" << std::endl << config_str << std::endl;
         _pipeline = oak->create_pipeline(config_str);
 

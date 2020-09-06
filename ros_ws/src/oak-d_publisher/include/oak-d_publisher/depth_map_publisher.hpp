@@ -17,7 +17,7 @@ class DepthMapPublisher
             const std::string& landmark_topic,
             const int rate);
 
-//    ~DepthMapPublisher();
+    // ~DepthMapPublisher();
 
     // create_pipeline();
 
@@ -33,11 +33,11 @@ class DepthMapPublisher
     std::string _config_file_path;
     std::string _depth_map_topic;
     std::string _landmark_topic;
-    std::string config_str;
+
     ros::Publisher _depth_map_pub;
-    Device *oak;
     std::shared_ptr<CNNHostPipeline> _pipeline;
     std::tuple<
         std::list<std::shared_ptr<NNetPacket>>,
         std::list<std::shared_ptr<HostDataPacket>>> _packets;
 };
+ 
