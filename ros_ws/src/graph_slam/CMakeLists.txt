@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   pcl_ros
   sensor_msgs
+  cv_bridge
 )
 
 find_package(OpenCV REQUIRED)
@@ -207,6 +208,20 @@ target_link_libraries(create_map_node
 # )
 
 
+
+add_executable(publish_pointcloud_from_depthmap_node
+  src/publish_pointcloud_from_depthmap_node.cpp
+)
+
+add_dependencies(publish_pointcloud_from_depthmap_node
+  ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(publish_pointcloud_from_depthmap_node
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ${PROJECT_NAME}
+)
 
 #############
 ## Install ##

@@ -55,34 +55,31 @@ DepthmapToPointCloudConverter::inverse_project_depthmap_into_3d(const cv::Mat& d
     return intrinsics_.inverse() * points * depth_flat_row_vec.asDiagonal();
 }
 
-pcl::PointCloud<pcl::PointXYZ>
-DepthmapToPointCloudConverter::get_pcl_pointcloud(const cv::Mat& depthmap, int subsample_factor = 1)
+void DepthmapToPointCloudConverter::get_pcl_pointcloud(
+    const cv::Mat& depthmap, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc,
+    int subsample_factor = 1)
 {
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-
     auto points_3d = inverse_project_depthmap_into_3d(depthmap);
 
     int valid_points_cnt = 0;
     int total_points = points_3d.cols();
 
     // reserve memory space for optimization
-    cloud.reserve(total_points);
+    output_pc->reserve(total_points);
 
     for (int i = 0; i < total_points; i += subsample_factor)
     {
         if (points_3d(2, i) >= depth_lower_limit && points_3d(2, i) < depth_upper_limit)
         {
-            cloud.push_back(pcl::PointXYZ(points_3d(0, i), points_3d(1, i), points_3d(2, i)));
+            output_pc->push_back(pcl::PointXYZ(points_3d(0, i), points_3d(1, i), points_3d(2, i)));
             valid_points_cnt++;
         }
     }
 
-    cloud.width = valid_points_cnt;
-    cloud.height = 1;
-    cloud.is_dense = true;
-    cloud.resize(valid_points_cnt);
-
-    return cloud;
+    output_pc->width = valid_points_cnt;
+    output_pc->height = 1;
+    output_pc->is_dense = true;
+    output_pc->resize(valid_points_cnt);
 }
 
 void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
@@ -96,8 +93,11 @@ void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
 
     std::string complete_store_path = save_file_path + "saved_pcd.pcd";
 
-    auto cloud_to_save = get_pcl_pointcloud(depthmap, subsample_factor);
-    pcl::io::savePCDFileASCII(complete_store_path, cloud_to_save);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_to_save =
+        boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+
+    get_pcl_pointcloud(depthmap, cloud_to_save, subsample_factor);
+    pcl::io::savePCDFileASCII(complete_store_path, *cloud_to_save);
 }
 
 Eigen::MatrixXf
