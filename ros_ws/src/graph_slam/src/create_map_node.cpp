@@ -65,6 +65,7 @@ void CreateMapNode::CallbackCreateMapWithOdomPoses(
     // Convert Point Cloud to ROS message
     sensor_msgs::PointCloud2Ptr out_cloud_msg = boost::make_shared<sensor_msgs::PointCloud2>();
     pcl::toROSMsg(*curr_map_cloud_, *out_cloud_msg);
+    out_cloud_msg->header.stamp = cloud_msg->header.stamp;
 
     // Publish cloud
     map_cloud_pub_.publish(curr_map_cloud_);
