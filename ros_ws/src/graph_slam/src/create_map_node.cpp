@@ -7,7 +7,8 @@ namespace graph_slam
 
 CreateMapNode::CreateMapNode(
     const std::string& in_odom_topic, const std::string& in_cloud_topic,
-    const std::string& out_cloud_topic)
+    const std::string& out_cloud_topic, bool use_odom_as_correct_poses) :
+      use_odom_as_correct_poses_(use_odom_as_correct_poses)
 {
     ros::NodeHandle nh;
 
@@ -19,7 +20,15 @@ CreateMapNode::CreateMapNode(
         message_filters::TimeSynchronizer<nav_msgs::Odometry, sensor_msgs::PointCloud2>>(
         odom_sub_, cloud_sub_, 5);
 
-    sync_->registerCallback(boost::bind(&CreateMapNode::Callback, this, _1, _2));
+    if (use_odom_as_correct_poses_)
+    {
+        sync_->registerCallback(
+            boost::bind(&CreateMapNode::CallbackCreateMapWithOdomPoses, this, _1, _2));
+    }
+    else
+    {
+        // TODO(deepak): Create Callback that uses optimized poses
+    }
 
     // Setup publisher
     map_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>(out_cloud_topic, 5);
@@ -30,7 +39,7 @@ CreateMapNode::CreateMapNode(
 
 CreateMapNode::~CreateMapNode() = default;
 
-void CreateMapNode::Callback(
+void CreateMapNode::CallbackCreateMapWithOdomPoses(
     const nav_msgs::OdometryConstPtr& odom_msg, const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
 {
     // Get Point cloud from cloud_msg
@@ -71,12 +80,14 @@ int main(int argc, char** argv)
     std::string in_odom_topic = "";
     std::string in_cloud_topic = "";
     std::string out_cloud_topic = "";
+    bool use_odom_as_correct_poses = true;
 
     int bad_params = 0;
 
     bad_params += !pnh.getParam("in_odom_topic", in_odom_topic);
     bad_params += !pnh.getParam("in_cloud_topic", in_cloud_topic);
     bad_params += !pnh.getParam("out_cloud_topic", out_cloud_topic);
+    bad_params += !pnh.getParam("use_odom_as_correct_poses", use_odom_as_correct_poses);
 
     if (bad_params != 0)
     {
@@ -84,7 +95,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    graph_slam::CreateMapNode cmn(in_odom_topic, in_cloud_topic, out_cloud_topic);
+    graph_slam::CreateMapNode cmn(
+        in_odom_topic, in_cloud_topic, out_cloud_topic, use_odom_as_correct_poses);
     ros::spin();
 
     return 0;
