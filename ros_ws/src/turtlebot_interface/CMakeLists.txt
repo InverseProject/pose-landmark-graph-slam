@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 #   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
 # )
-
+message("Here:---->${OpenCV_INCLUDE_DIRS}i-------~~~~~~~~~~~~~~~~~~~~~~ ${cmake_MODULE_PATH} ")
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################

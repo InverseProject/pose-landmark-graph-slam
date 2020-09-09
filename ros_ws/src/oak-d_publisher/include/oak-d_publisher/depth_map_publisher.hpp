@@ -6,6 +6,7 @@
 #include <sstream>
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "depthai/depthai_wrapper.hpp"
 
 class DepthMapPublisher
 {
@@ -17,27 +18,16 @@ class DepthMapPublisher
             const std::string& landmark_topic,
             const int rate);
 
-//    ~DepthMapPublisher();
-
-    // create_pipeline();
-
     void publisher();
 
 
     private:
-    using PacketsTuple = std::tuple<
-        std::list<std::shared_ptr<NNetPacket>>,
-        std::list<std::shared_ptr<HostDataPacket>>>;
-    
-    PacketsTuple packets;
+    using CV_mat_ptr = std::shared_ptr<cv::Mat>;
     std::string _config_file_path;
     std::string _depth_map_topic;
     std::string _landmark_topic;
-    std::string config_str;
     ros::Publisher _depth_map_pub;
-    Device *oak;
-    std::shared_ptr<CNNHostPipeline> _pipeline;
-    std::tuple<
-        std::list<std::shared_ptr<NNetPacket>>,
-        std::list<std::shared_ptr<HostDataPacket>>> _packets;
+    DepthAI *oak;
+    std::unordered_map<std::string, CV_mat_ptr> output_streams;
+
 };

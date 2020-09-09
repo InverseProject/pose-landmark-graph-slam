@@ -28,7 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV)
 
 # find_package(depthai-core)
-
+message("Here:---->${OpenCV_INCLUDE_DIRS}i------- ${CMAKE_MODULE_PATH} ")
 
 catkin_package(
   INCLUDE_DIRS include
