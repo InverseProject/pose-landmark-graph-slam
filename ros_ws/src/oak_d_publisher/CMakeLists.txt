@@ -12,7 +12,7 @@ add_subdirectory(depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_F
 
 
 add_compile_options(-std=c++11)
-project(oak-d_publisher)
+project(oak_d_publisher)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -20,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   cv_bridge
+  message_generation
+  genmsg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -28,12 +30,22 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV)
 
 # find_package(depthai-core)
-message("Here:---->${OpenCV_INCLUDE_DIRS}i------- ${CMAKE_MODULE_PATH} ")
+
+add_service_files(
+  FILES
+  disparity_threshold.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
+  message_runtime
     roscpp
     rospy
   DEPENDS
@@ -42,8 +54,6 @@ catkin_package(
 ###########
 ## Build ##
 ###########
-message("Project---->  ${CMAKE_CURRENT_LIST_DIR} ========= ${CMAKE_CURRENT_BINARY_DIR}....------> ")
-message(${catkin_INCLUDE_DIRS})
 
 include_directories(
   include
@@ -52,6 +62,8 @@ include_directories(
 #  /usr/local/include/depthai/
 )
 
+
+
 #${depthai_INCLUDE_DIRS}
 
 add_executable(${PROJECT_NAME}_node
@@ -59,7 +71,8 @@ add_executable(${PROJECT_NAME}_node
 )
 
 add_dependencies(${PROJECT_NAME}_node
-  ${catkin_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
 )
 
 target_link_libraries(${PROJECT_NAME}_node PUBLIC depthai-core

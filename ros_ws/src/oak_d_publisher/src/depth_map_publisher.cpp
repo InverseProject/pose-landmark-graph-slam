@@ -1,15 +1,13 @@
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 // #include "depthai/depthai_wrapper.hpp"
-#include "oak-d_publisher/depth_map_publisher.hpp"
+#include "oak_d_publisher/depth_map_publisher.hpp"
+#include "oak_d_publisher/disparity_threshold.h"
+
 
 using namespace std;
     
@@ -24,12 +22,23 @@ DepthMapPublisher::DepthMapPublisher(
     
     ros::NodeHandle n;
     ros::Rate loop_rate(rate);
+    _disparity_service_name = "disparity_confidence_threshold";
 
     _depth_map_pub = n.advertise<sensor_msgs::Image>(_depth_map_topic, 2);
     oak = new DepthAI("", config_file_path, false);
-
+    _disparity_threshold_srv = n.advertiseService(_disparity_service_name, &DepthMapPublisher::service_callback, this);
+// &NumberCounter::callback_reset_counter
 }
 
+
+
+bool DepthMapPublisher::service_callback(oak_d_publisher::disparity_threshold::Request &req, 
+                                        oak_d_publisher::disparity_threshold::Response &res){
+
+    oak->send_disparity_confidence_threshold(req.threshold);
+    res.is_set = true;
+    return true;
+}
 
 void DepthMapPublisher::publisher(){
     
@@ -46,7 +55,6 @@ void DepthMapPublisher::publisher(){
     {
 
         // std::cout << "<-------------- colelcted packers ----------> " << std::endl;
-
         oak->get_frames(output_streams);
         depth_msg.header.stamp = ros::Time::now();
         depth_msg.header.frame_id = "depth_map";
