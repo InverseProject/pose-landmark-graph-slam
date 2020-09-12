@@ -1,0 +1,6 @@
+[submodule "ros_ws/src/oak-d_publisher/depthai-core"]
+	path = ros_ws/src/oak-d_publisher/depthai-core
+	url = https://github.com/saching13/depthai-core.git
+[submodule "ros_ws/src/oak_d_publisher/depthai-core"]
+	path = ros_ws/src/oak_d_publisher/depthai-core
+	url = https://github.com/saching13/depthai-core.git
