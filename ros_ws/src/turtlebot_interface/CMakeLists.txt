@@ -13,7 +13,11 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen REQUIRED)
-
+# SET( EIGEN3_INCLUDE_DIR "$ENV{EIGEN3_INCLUDE_DIR}" )
+# IF( NOT EIGEN3_INCLUDE_DIR )
+#     MESSAGE( FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
+# ENDIF()
+# INCLUDE_DIRECTORIES ( "${EIGEN3_INCLUDE_DIR}" )
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -73,7 +77,7 @@ find_package(Eigen REQUIRED)
 #   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
 # )
-message("Here:---->${OpenCV_INCLUDE_DIRS}i-------~~~~~~~~~~~~~~~~~~~~~~ ${cmake_MODULE_PATH} ")
+
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
@@ -117,12 +121,15 @@ catkin_package(
 ## Build ##
 ###########
 
+message("<----------------------------------------  ${Eigen3_INCLUDE_DIRS}------------------->")
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
+  # ${EIGEN3_INCLUDE_DIR}
 )
 
 ## Declare a C++ library

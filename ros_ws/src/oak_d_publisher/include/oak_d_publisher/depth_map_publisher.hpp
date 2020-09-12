@@ -23,7 +23,7 @@ class DepthMapPublisher
     //                                     oak_d_publisher::disparity_threshold::Response &res);
 
     private:
-    // using CV_mat_ptr = std::shared_ptr<cv::Mat>;
+    
     std::string _config_file_path;
     std::string _depth_map_topic;
     std::string _landmark_topic;
