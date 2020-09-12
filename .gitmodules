@@ -1,0 +1,3 @@
+[submodule "ros_ws/src/depthai_ros/depthai-core"]
+	path = ros_ws/src/depthai_ros/depthai-core
+	url = https://github.com/saching13/depthai-core.git
