@@ -19,8 +19,8 @@ class DepthMapPublisher
 
     void publisher();
 
-    bool service_callback(oak_d_publisher::disparity_threshold::Request &req, 
-                                        oak_d_publisher::disparity_threshold::Response &res);
+    // bool service_callback(oak_d_publisher::disparity_threshold::Request &req, 
+    //                                     oak_d_publisher::disparity_threshold::Response &res);
 
     private:
     // using CV_mat_ptr = std::shared_ptr<cv::Mat>;

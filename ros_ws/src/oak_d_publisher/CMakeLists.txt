@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   cv_bridge
-  message_generation
+  # message_generation
   genmsg
 )
 
@@ -31,15 +31,15 @@ find_package(OpenCV)
 
 # find_package(depthai-core)
 
-add_service_files(
-  FILES
-  disparity_threshold.srv
-)
+# add_service_files(
+#   FILES
+#   disparity_threshold.srv
+# )
 
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 catkin_package(
   INCLUDE_DIRS include
@@ -71,9 +71,13 @@ add_executable(${PROJECT_NAME}_node
 )
 
 add_dependencies(${PROJECT_NAME}_node
-  ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp
+${catkin_EXPORTED_TARGETS} 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
 )
+# add_dependencies(${PROJECT_NAME}_node
+#   ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp
+#   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+# )
 
 target_link_libraries(${PROJECT_NAME}_node PUBLIC depthai-core
  ${catkin_LIBRARIES}
