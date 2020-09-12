@@ -5,7 +5,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 // #include "depthai/depthai_wrapper.hpp"
-#include "oak_d_publisher/depth_map_publisher.hpp"
+#include "depthai_ros/depth_map_publisher.hpp"
 // #include "oak_d_publisher/disparity_threshold.h"
 
 
@@ -74,8 +74,29 @@ void DepthMapPublisher::publisher(){
 int main(int argc, char** argv){
     ros::init(argc, argv, "oak_publisher");
 
-    DepthMapPublisher depth_publisher("/home/jetbot/opencv_comp/try_3/pose-landmark-graph-slam/ros_ws/src/oak-d_publisher/config/config.json", "depth_map", "landmark", 10);
-    // std::cout << "Starting publishing" << endl;
+    ros::NodeHandle pnh("~");
+
+    std::string config_file_path = "";
+    std::string depth_map_topic = "";
+    std::string landmark_topic = "";
+    std::string rate_str = "";
+    int rate;
+
+ int bad_params = 0;
+    
+    bad_params += !pnh.getParam("config_file_path", config_file_path);
+    bad_params += !pnh.getParam("depth_map_topic", depth_map_topic);
+    bad_params += !pnh.getParam("landmark_topic", landmark_topic);
+    bad_params += !pnh.getParam("rate", rate);
+
+    if (bad_params > 0)
+    {
+        std::cout << "One or more parameters not set! Exiting." << std::endl;
+        return 1;
+    }
+
+    std::cout << config_file_path << std::endl;
+    DepthMapPublisher depth_publisher(config_file_path, depth_map_topic, landmark_topic, rate);
     depth_publisher.publisher();
  
     return 0;

@@ -12,7 +12,7 @@ add_subdirectory(depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_F
 
 
 add_compile_options(-std=c++11)
-project(oak_d_publisher)
+project(depthai_ros)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -66,11 +66,11 @@ include_directories(
 
 #${depthai_INCLUDE_DIRS}
 
-add_executable(${PROJECT_NAME}_node
+add_executable(depth_map_pub_node
   src/depth_map_publisher.cpp
 )
 
-add_dependencies(${PROJECT_NAME}_node
+add_dependencies(depth_map_pub_node
 ${catkin_EXPORTED_TARGETS} 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
 )
@@ -79,7 +79,7 @@ ${catkin_EXPORTED_TARGETS}
 #   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
 # )
 
-target_link_libraries(${PROJECT_NAME}_node PUBLIC depthai-core
+target_link_libraries(depth_map_pub_node PUBLIC depthai-core
  ${catkin_LIBRARIES}
 )
 
