@@ -1,38 +1,38 @@
 
 #include "ros/ros.h"
-#include "std_msgs/String.h"
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
-// #include "depthai/depthai_wrapper.hpp"
 #include "depthai_ros/depth_map_publisher.hpp"
 // #include "oak_d_publisher/disparity_threshold.h"
 
-
-using namespace std;
-    
 DepthMapPublisher::DepthMapPublisher(
-            const std::string config_file_path,
-            const std::string depth_map_topic,
-            const std::string landmark_topic,
-            const int rate):
-            _config_file_path(config_file_path), 
-            _depth_map_topic(depth_map_topic),
-            _landmark_topic(landmark_topic){
-    
+    const std::string config_file_path, const std::string depth_map_topic,
+    const std::string landmark_topic, const int rate) :
+      _config_file_path(config_file_path),
+      _depth_map_topic(depth_map_topic),
+      _landmark_topic(landmark_topic)
+{
+
     ros::NodeHandle n;
     ros::Rate loop_rate(rate);
-    _disparity_service_name = "/disparity_confidence_threshold";
 
+    // _disparity_service_name = "/disparity_confidence_threshold";
+
+    // setup the publisher for depth map
     _depth_map_pub = n.advertise<sensor_msgs::Image>(_depth_map_topic, 2);
+
+    // start the device and create the pipeline
     oak = new DepthAI("", config_file_path, false);
-    // _disparity_threshold_srv = n.advertiseService(_disparity_service_name, &DepthMapPublisher::service_callback, this);
-// &NumberCounter::callback_reset_counter
+    // _disparity_threshold_srv = n.advertiseService(_disparity_service_name,
+    // &DepthMapPublisher::service_callback, this);
 }
 
+// Destroying OAK-D ptr
+DepthMapPublisher::~DepthMapPublisher() { oak->~DepthAI(); }
 
-
-// bool DepthMapPublisher::service_callback(oak_d_publisher::disparity_threshold::Request &req, 
+// Service for setting depth threshold
+// bool DepthMapPublisher::service_callback(oak_d_publisher::disparity_threshold::Request &req,
 //                                         oak_d_publisher::disparity_threshold::Response &res){
 
 //     oak->send_disparity_confidence_threshold(req.threshold);
@@ -40,22 +40,17 @@ DepthMapPublisher::DepthMapPublisher(
 //     return true;
 // }
 
-void DepthMapPublisher::publisher(){
-    
+// Depth map publisher
+void DepthMapPublisher::publisher()
+{
+
     cv_bridge::CvImage depth_msg;
-    depth_msg.encoding = sensor_msgs::image_encodings::MONO16 ; // Or whatever
-    
-    // sensor_msgs::Image depth_map;
-    // depth_map.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
-    
-    // cv::Mat img_data = cv::Mat(720,1280 , CV_16U);
-    // unsigned char* depth_data = reinterpret_cast<unsigned char*>(img_data.data);
-    
-    while(ros::ok())
+    depth_msg.encoding = sensor_msgs::image_encodings::MONO16;  // Or whatever
+
+    while (ros::ok())
     {
 
-        // std::cout << "<-------------- colelcted packers ----------> " << std::endl;
-        oak->get_frames(output_streams);
+        oak->get_frames(output_streams);  // Fetching the frames from the oak-d
         depth_msg.header.stamp = ros::Time::now();
         depth_msg.header.frame_id = "depth_map";
         depth_msg.image = *output_streams["depth_raw"];
@@ -65,13 +60,10 @@ void DepthMapPublisher::publisher(){
     }
 
     return;
-    
-
 }
 
-
-
-int main(int argc, char** argv){
+int main(int argc, char** argv)
+{
     ros::init(argc, argv, "oak_publisher");
 
     ros::NodeHandle pnh("~");
@@ -82,8 +74,8 @@ int main(int argc, char** argv){
     std::string rate_str = "";
     int rate;
 
- int bad_params = 0;
-    
+    int bad_params = 0;
+
     bad_params += !pnh.getParam("config_file_path", config_file_path);
     bad_params += !pnh.getParam("depth_map_topic", depth_map_topic);
     bad_params += !pnh.getParam("landmark_topic", landmark_topic);
@@ -98,6 +90,6 @@ int main(int argc, char** argv){
     std::cout << config_file_path << std::endl;
     DepthMapPublisher depth_publisher(config_file_path, depth_map_topic, landmark_topic, rate);
     depth_publisher.publisher();
- 
+
     return 0;
 }
