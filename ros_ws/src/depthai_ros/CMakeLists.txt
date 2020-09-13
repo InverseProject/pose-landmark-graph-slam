@@ -1,15 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
-
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-
-# add_subdirectory(depthai-core)
 add_subdirectory(depthai-core ${CMAKE_CURRENT_BINARY_DIR}/depthai-core EXCLUDE_FROM_ALL)
-
 
 add_compile_options(-std=c++11)
 project(depthai_ros)
@@ -20,16 +11,12 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   cv_bridge
-  # message_generation
+  message_generation
   genmsg
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
 find_package(OpenCV)
-
-# find_package(depthai-core)
 
 # add_service_files(
 #   FILES
@@ -59,12 +46,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
-#  /usr/local/include/depthai/
 )
-
-
-
-#${depthai_INCLUDE_DIRS}
 
 add_executable(depth_map_pub_node
   src/depth_map_publisher.cpp
@@ -74,18 +56,11 @@ add_dependencies(depth_map_pub_node
 ${catkin_EXPORTED_TARGETS} 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
 )
-# add_dependencies(${PROJECT_NAME}_node
-#   ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp
-#   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
-# )
 
 target_link_libraries(depth_map_pub_node PUBLIC depthai-core
  ${catkin_LIBRARIES}
 )
 
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
 
 #---------------------------------------------------------------#
 ## Declare a C++ library

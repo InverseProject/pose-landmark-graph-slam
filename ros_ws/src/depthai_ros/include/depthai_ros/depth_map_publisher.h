@@ -1,8 +1,11 @@
+#pragma once
+
 #include <string>
 #include "ros/ros.h"
 #include "depthai/depthai_wrapper.hpp"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
+#include <unordered_map>
 
 using CV_mat_ptr = std::shared_ptr<cv::Mat>;
 
@@ -24,14 +27,14 @@ public:
 
     /**
      * Destructor
-     * Deinit the device before stopping the ros node.
+     * Stop the device before stopping the ROS node.
      */
     ~DepthMapPublisher();
 
     /**
      *  Publishes the depth_map over the given topic in the constructor
      */
-    void publisher();
+    void Publisher();
 
     /**
      *  Service to send the confidence threshold
@@ -41,12 +44,12 @@ public:
 
 private:
     // Class Private Variables
-    std::string _config_file_path;
-    std::string _depth_map_topic;
-    std::string _landmark_topic;
-    std::string _disparity_service_name;
-    ros::ServiceServer _disparity_threshold_srv;
-    ros::Publisher _depth_map_pub;
-    DepthAI* oak;
-    std::unordered_map<std::string, CV_mat_ptr> output_streams;
+    std::string config_file_path_;
+    std::string depth_map_topic_;
+    std::string landmark_topic_;
+    std::string disparity_service_name_;
+    ros::ServiceServer _disparity_threshold_srv_;
+    ros::Publisher depth_map_pub_;
+    std::unique_ptr<DepthAI> oak_;
+    std::unordered_map<std::string, CV_mat_ptr> output_streams_;
 };

@@ -1,4 +1,6 @@
-hunter_config(
+
+# Hunter config file is used to download and link these downloaded libraries using hunter_add_package()
+hunter_config( 
     nlohmann_json_schema_validator
     VERSION "2.1.1"
     URL "https://github.com/luxonis/json-schema-validator/archive/hunter-2.1.1.tar.gz"

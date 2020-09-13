@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <opencv2/core/core.hpp>
 #include <graph_slam/depthmap_to_pointcloud_converter.h>
 
 cv::Mat load_depthmap(std::string file_path)
