@@ -10,38 +10,28 @@ namespace depthai_ros
 {
 
 DepthMapPublisher::DepthMapPublisher(
-    const std::string config_file_path, const std::string depth_map_topic,
-    const std::string landmark_topic, const int rate) :
+    const std::string& config_file_path, const std::string& depth_map_topic,
+    const std::string& landmark_topic, const int rate) :
       config_file_path_(config_file_path),
       depth_map_topic_(depth_map_topic),
       landmark_topic_(landmark_topic)
 {
 
-    ros::NodeHandle n;
+    ros::NodeHandle nh;
     ros::Rate loop_rate(rate);
 
-    // disparity_service_name_ = "/disparity_confidence_threshold";
 
     // setup the publisher for depth map
-    depth_map_pub_ = n.advertise<sensor_msgs::Image>(depth_map_topic_, 10);
+    depth_map_pub_ = nh.advertise<sensor_msgs::Image>(depth_map_topic_, 10);
 
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
-    // disparity_threshold_srv_ = n.advertiseService(_disparity_service_name,
-    // &DepthMapPublisher::service_callback, this);
+
 }
 
 // Destroying OAK-D ptr
 DepthMapPublisher::~DepthMapPublisher() { oak_->~DepthAI(); }
 
-// Service for setting depth threshold
-// bool DepthMapPublisher::service_callback(oak_d_publisher::disparity_threshold::Request &req,
-//                                         oak_d_publisher::disparity_threshold::Response &res){
-
-//     oak->send_disparity_confidence_threshold(req.threshold);
-//     res.is_set = true;
-//     return true;
-// }
 
 // Depth map publisher
 void DepthMapPublisher::Publisher()
@@ -73,7 +63,6 @@ int main(int argc, char** argv)
     std::string config_file_path = "";
     std::string depth_map_topic = "";
     std::string landmark_topic = "";
-    std::string rate_str = "";
     int rate;
 
     int bad_params = 0;

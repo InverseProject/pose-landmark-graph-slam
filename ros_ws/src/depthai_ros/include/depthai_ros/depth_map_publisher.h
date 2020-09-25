@@ -29,8 +29,8 @@ public:
      * @param rate (int): Loop rate of ROS
      */
     DepthMapPublisher(
-        const std::string config_file_path, const std::string depth_map_topic,
-        const std::string landmark_topic, const int rate);
+        const std::string& config_file_path, const std::string& depth_map_topic,
+        const std::string& landmark_topic, const int rate);
 
     /**
      * Destructor
@@ -43,19 +43,12 @@ public:
      */
     void Publisher();
 
-    /**
-     *  Service to send the confidence threshold
-     */
-    // bool service_callback(oak_d_publisher::disparity_threshold::Request &req,
-    //                                     oak_d_publisher::disparity_threshold::Response &res);
-
 private:
     // Class Private Variables
     std::string config_file_path_;
     std::string depth_map_topic_;
     std::string landmark_topic_;
     std::string disparity_service_name_;
-    ros::ServiceServer _disparity_threshold_srv_;
     ros::Publisher depth_map_pub_;
     std::unique_ptr<DepthAI::DepthAI> oak_;
     std::unordered_map<std::string, CV_mat_ptr> output_streams_;
