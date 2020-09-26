@@ -20,18 +20,15 @@ DepthMapPublisher::DepthMapPublisher(
     ros::NodeHandle nh;
     ros::Rate loop_rate(rate);
 
-
     // setup the publisher for depth map
     depth_map_pub_ = nh.advertise<sensor_msgs::Image>(depth_map_topic_, 10);
 
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
-
 }
 
 // Destroying OAK-D ptr
 DepthMapPublisher::~DepthMapPublisher() { oak_->~DepthAI(); }
-
 
 // Depth map publisher
 void DepthMapPublisher::Publisher()
