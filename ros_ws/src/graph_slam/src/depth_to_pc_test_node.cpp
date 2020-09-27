@@ -7,7 +7,8 @@
 
 cv::Mat load_depthmap(std::string file_path)
 {
-    cv::Mat depth_map = cv::imread(file_path, CV_LOAD_IMAGE_UNCHANGED);
+
+    cv::Mat depth_map = cv::imread(file_path, cv::IMREAD_UNCHANGED);
     return depth_map;
 }
 
