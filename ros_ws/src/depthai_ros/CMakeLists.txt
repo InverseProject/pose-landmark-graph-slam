@@ -48,16 +48,16 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(depth_map_pub_node
-  src/depth_map_publisher.cpp
+add_executable(depth_map_publisher_node
+  src/depth_map_publisher_node.cpp
 )
 
-add_dependencies(depth_map_pub_node
+add_dependencies(depth_map_publisher_node
 ${catkin_EXPORTED_TARGETS} 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
 )
 
-target_link_libraries(depth_map_pub_node PUBLIC depthai-core
+target_link_libraries(depth_map_publisher_node PUBLIC depthai-core
  ${catkin_LIBRARIES}
 )
 

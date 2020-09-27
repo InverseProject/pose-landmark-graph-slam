@@ -2,14 +2,14 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
-#include "depthai_ros/depth_map_publisher.h"
+#include "depthai_ros/depth_map_publisher_node.h"
 // #include "oak_d_publisher/disparity_threshold.h"
 #include <unordered_map>
 
 namespace depthai_ros
 {
 
-DepthMapPublisher::DepthMapPublisher(
+DepthMapPublisherNode::DepthMapPublisherNode(
     const std::string& config_file_path, const std::string& depth_map_topic,
     const std::string& landmark_topic, const int rate) :
       config_file_path_(config_file_path),
@@ -28,16 +28,16 @@ DepthMapPublisher::DepthMapPublisher(
 }
 
 // Destroying OAK-D ptr
-DepthMapPublisher::~DepthMapPublisher() { oak_->~DepthAI(); }
+DepthMapPublisherNode::~DepthMapPublisherNode() { oak_->~DepthAI(); }
 
 // Depth map publisher
-void DepthMapPublisher::Publisher()
+void DepthMapPublisherNode::Publisher()
 {
     cv_bridge::CvImage depth_msg;
     depth_msg.encoding = sensor_msgs::image_encodings::MONO16;
     while (ros::ok())
     {
-        oak_->get_frames(output_streams_);  // Fetching the frames from the oak-d
+        oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
         depth_msg.header.stamp = ros::Time::now();
         depth_msg.header.frame_id = "OAK-D-right";
         depth_msg.image = *output_streams_["depth"];
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    depthai_ros::DepthMapPublisher depth_publisher(
+    depthai_ros::DepthMapPublisherNode depth_publisher(
         config_file_path, depth_map_topic, landmark_topic, rate);
     depth_publisher.Publisher();
 

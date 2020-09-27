@@ -16,7 +16,7 @@ using CV_mat_ptr = std::shared_ptr<cv::Mat>;
  * Currently it is capable of publishing depth map produced by OAK-D.
  * Streaming AI based objects position is WIP
  */
-class DepthMapPublisher
+class DepthMapPublisherNode
 {
 
 public:
@@ -28,7 +28,7 @@ public:
      * @param landmark_topic (std::string): Topic on which landmarks map will be broadcasted. (WIP)
      * @param rate (int): Loop rate of ROS
      */
-    DepthMapPublisher(
+    DepthMapPublisherNode(
         const std::string& config_file_path, const std::string& depth_map_topic,
         const std::string& landmark_topic, const int rate);
 
@@ -36,7 +36,7 @@ public:
      * Destructor
      * Stop the device before stopping the ROS node.
      */
-    ~DepthMapPublisher();
+    ~DepthMapPublisherNode();
 
     /**
      *  Publishes the depth_map over the given topic in the constructor
