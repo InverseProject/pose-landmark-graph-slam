@@ -53,7 +53,7 @@ add_executable(depth_map_publisher_node
 )
 
 add_dependencies(depth_map_publisher_node
-${catkin_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS} 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
 )
 
