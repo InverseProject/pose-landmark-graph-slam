@@ -25,6 +25,7 @@ DepthMapPublisherNode::DepthMapPublisherNode(
 
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
+    // oak_->send_disparity_confidence_threshold(200);
 }
 
 // Destroying OAK-D ptr
@@ -33,18 +34,40 @@ DepthMapPublisherNode::~DepthMapPublisherNode() { oak_->~DepthAI(); }
 // Depth map publisher
 void DepthMapPublisherNode::Publisher()
 {
-    cv_bridge::CvImage depth_msg;
-    depth_msg.encoding = sensor_msgs::image_encodings::MONO16;
+    oak_->send_disparity_confidence_threshold(200);
+
+   // while (ros::ok())
+    //{
+//        cv_bridge::CvImage depth_msg;
+//        depth_msg.encoding = "mono16";
+//        oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
+//        depth_msg.header.stamp = ros::Time::now();
+//        depth_msg.header.frame_id = "OAK-D-right";
+//        depth_msg.image = *output_streams_["depth"];
+//        depth_map_pub_.publish(depth_msg.toImageMsg());
+
     while (ros::ok())
     {
+        cv_bridge::CvImage depth_msg;
+        depth_msg.encoding = "mono16";
         oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
-        depth_msg.header.stamp = ros::Time::now();
-        depth_msg.header.frame_id = "OAK-D-right";
-        depth_msg.image = *output_streams_["depth"];
-        depth_map_pub_.publish(depth_msg.toImageMsg());
+        // depth_msg.header.stamp = ros::Time::now();
+        // depth_msg.header.frame_id = "OAK-D-right";
+        // depth_msg.image = ;
+
+    	std_msgs::Header header;
+        header.stamp = ros::Time::now();
+        header.frame_id = "OAK-D-right";
+
+        sensor_msgs::ImagePtr depthmap_msg = cv_bridge::CvImage(header,
+            sensor_msgs::image_encodings::TYPE_16UC1,
+            *output_streams_["depth"]).toImageMsg();
+        depth_map_pub_.publish(depthmap_msg);
 
         ros::spinOnce();
     }
+      //  ros::spinOnce();
+    //}
 
     return;
 }
