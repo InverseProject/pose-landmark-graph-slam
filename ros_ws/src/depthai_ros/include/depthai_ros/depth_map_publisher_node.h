@@ -41,7 +41,7 @@ public:
     /**
      *  Publishes the depth_map over the given topic in the constructor
      */
-    void Publisher();
+    void Publisher(int threshold);
 
 private:
     // Class Private Variables

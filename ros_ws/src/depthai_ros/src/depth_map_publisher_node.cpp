@@ -3,7 +3,6 @@
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 #include "depthai_ros/depth_map_publisher_node.h"
-// #include "oak_d_publisher/disparity_threshold.h"
 #include <unordered_map>
 
 namespace depthai_ros
@@ -32,9 +31,9 @@ DepthMapPublisherNode::DepthMapPublisherNode(
 DepthMapPublisherNode::~DepthMapPublisherNode() { oak_->~DepthAI(); }
 
 // Depth map publisher
-void DepthMapPublisherNode::Publisher()
+void DepthMapPublisherNode::Publisher(int threshold)
 {
-    oak_->send_disparity_confidence_threshold(200);
+    oak_->send_disparity_confidence_threshold(threshold);
 
    // while (ros::ok())
     //{
@@ -83,6 +82,7 @@ int main(int argc, char** argv)
     std::string config_file_path = "";
     std::string depth_map_topic = "";
     std::string landmark_topic = "";
+    int disparity_threshold;
     int rate;
 
     int bad_params = 0;
@@ -90,6 +90,7 @@ int main(int argc, char** argv)
     bad_params += !pnh.getParam("config_file_path", config_file_path);
     bad_params += !pnh.getParam("depth_map_topic", depth_map_topic);
     bad_params += !pnh.getParam("landmark_topic", landmark_topic);
+    bad_params += !pnh.getParam("disparity_threshold", disparity_threshold);
     bad_params += !pnh.getParam("rate", rate);
 
     if (bad_params > 0)
@@ -100,7 +101,7 @@ int main(int argc, char** argv)
 
     depthai_ros::DepthMapPublisherNode depth_publisher(
         config_file_path, depth_map_topic, landmark_topic, rate);
-    depth_publisher.Publisher();
+    depth_publisher.Publisher(disparity_threshold);
 
     return 0;
 }
