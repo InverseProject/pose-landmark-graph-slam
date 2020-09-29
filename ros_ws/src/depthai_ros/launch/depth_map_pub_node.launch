@@ -4,7 +4,7 @@
     <arg name="config_file_path" default="$(find depthai_ros)/config/config.json"/>
     <arg name="depth_map_topic" default="/depth_map"/>
     <arg name="landmark_topic" default="/landmark"/>
-    <arg name="disparity_threshold" default="200"/>
+    <arg name="disparity_confidence_threshold" default="200"/>
     <arg name="rate" default="10"/>
 
     <node pkg="depthai_ros" name="depth_map_publisher_node" type="depth_map_publisher_node" output="screen">
