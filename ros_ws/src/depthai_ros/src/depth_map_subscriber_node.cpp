@@ -31,7 +31,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         {
             for (int j = 0; j < img.cols; j++)
             {
-                img.at<uint16_t>(i, j) = static_cast<uint16_t>(65535 / img.at<uint16_t>(i, j));
+                img.at<uint16_t>(i, j) = static_cast<uint16_t>(std::numeric_limits<uint16_t>::max / img.at<uint16_t>(i, j));
             }
         }
         // convert 16 bit depth map to 8 bit and applyinh color map for visualization
