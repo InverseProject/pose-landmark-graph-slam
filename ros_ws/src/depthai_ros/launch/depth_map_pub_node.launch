@@ -11,7 +11,7 @@
         <param name="config_file_path" value="$(arg config_file_path)"/>
         <param name="depth_map_topic" value="$(arg depth_map_topic)"/>
         <param name="landmark_topic" value="$(arg landmark_topic)"/>
-        <param name="disparity_threshold" value="$(arg disparity_threshold)"/>
+        <param name="disparity_confidence_threshold" value="$(arg disparity_confidence_threshold)"/>
         <param name="rate" value="$(arg rate)"/>
     </node>
 
