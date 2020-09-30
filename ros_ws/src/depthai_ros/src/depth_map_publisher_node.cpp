@@ -24,21 +24,18 @@ DepthMapPublisherNode::DepthMapPublisherNode(
 
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
-    // oak_->send_disparity_confidence_threshold(200);
 }
 
 // Destroying OAK-D ptr
 DepthMapPublisherNode::~DepthMapPublisherNode() { oak_->~DepthAI(); }
 
 // Depth map publisher
-void DepthMapPublisherNode::Publisher(int threshold)
+void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
 {
-    oak_->send_disparity_confidence_threshold(threshold);
+    oak_->send_disparity_confidence_threshold(disparity_confidence_threshold);
 
     while (ros::ok())
     {
-        cv_bridge::CvImage depth_msg;
-        depth_msg.encoding = "mono16";
         oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
 
         std_msgs::Header header;
@@ -68,7 +65,7 @@ int main(int argc, char** argv)
     std::string config_file_path = "";
     std::string depth_map_topic = "";
     std::string landmark_topic = "";
-    int disparity_threshold;
+    int disparity_confidence_threshold;
     int rate;
 
     int bad_params = 0;
@@ -76,7 +73,7 @@ int main(int argc, char** argv)
     bad_params += !pnh.getParam("config_file_path", config_file_path);
     bad_params += !pnh.getParam("depth_map_topic", depth_map_topic);
     bad_params += !pnh.getParam("landmark_topic", landmark_topic);
-    bad_params += !pnh.getParam("disparity_threshold", disparity_threshold);
+    bad_params += !pnh.getParam("disparity_confidence_threshold", disparity_confidence_threshold);
     bad_params += !pnh.getParam("rate", rate);
 
     if (bad_params > 0)
@@ -87,7 +84,7 @@ int main(int argc, char** argv)
 
     depthai_ros::DepthMapPublisherNode depth_publisher(
         config_file_path, depth_map_topic, landmark_topic, rate);
-    depth_publisher.Publisher(disparity_threshold);
+    depth_publisher.Publisher(disparity_confidence_threshold);
 
     return 0;
 }
