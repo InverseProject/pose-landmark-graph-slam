@@ -40,8 +40,10 @@ public:
 
     /**
      *  Publishes the depth_map over the given topic in the constructor
+     * @param depth_confidence_threshold (uint8_t): disparity confidence threshold(0-255)
+     * higher the confidence more the information is allowed.
      */
-    void Publisher();
+    void Publisher(uint8_t disparity_confidence_threshold);
 
 private:
     // Class Private Variables
