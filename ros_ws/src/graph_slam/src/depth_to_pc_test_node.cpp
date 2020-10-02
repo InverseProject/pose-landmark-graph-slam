@@ -18,14 +18,12 @@ int main(int argc, char** argv)
     ros::NodeHandle pnh("~");
 
     std::vector<float> intrinsics;
-    int subsample_factor = 1;
     std::string depthmap_path = "";
     std::string pcd_save_path = "";
 
     int bad_params = 0;
 
     bad_params += !pnh.getParam("intrinsic_matrix", intrinsics);
-    bad_params += !pnh.getParam("subsample_factor", subsample_factor);
     bad_params += !pnh.getParam("depthmap_path", depthmap_path);
     bad_params += !pnh.getParam("pcd_save_path", pcd_save_path);
 
@@ -42,7 +40,7 @@ int main(int argc, char** argv)
 
     graph_slam::DepthmapToPointCloudConverter convert_depthmap_to_pc(intrinsics_eigen);
 
-    convert_depthmap_to_pc.save_pointcloud_to_pcd(mock_depth_map, pcd_save_path, subsample_factor);
+    convert_depthmap_to_pc.save_pointcloud_to_pcd(mock_depth_map, pcd_save_path);
 
     return 0;
 }

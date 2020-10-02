@@ -61,8 +61,7 @@ DepthmapToPointCloudConverter::inverse_project_depthmap_into_3d(const cv::Mat& d
 }
 
 void DepthmapToPointCloudConverter::get_pcl_pointcloud(
-    const cv::Mat& depthmap, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc,
-    int subsample_factor = 1)
+    const cv::Mat& depthmap, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc)
 {
     auto points_3d = inverse_project_depthmap_into_3d(depthmap);
 
@@ -72,7 +71,7 @@ void DepthmapToPointCloudConverter::get_pcl_pointcloud(
     // reserve memory space for optimization
     output_pc->reserve(total_points);
 
-    for (int i = 0; i < total_points; i += subsample_factor)
+    for (int i = 0; i < total_points; i++)
     {
         if (points_3d(2, i) >= depth_lower_limit && points_3d(2, i) < depth_upper_limit)
         {
@@ -88,7 +87,7 @@ void DepthmapToPointCloudConverter::get_pcl_pointcloud(
 }
 
 void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
-    const cv::Mat& depthmap, const std::string& save_file_path, int subsample_factor = 1)
+    const cv::Mat& depthmap, const std::string& save_file_path)
 {
     if (save_file_path.empty())
     {
@@ -101,7 +100,7 @@ void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_to_save =
         boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
 
-    get_pcl_pointcloud(depthmap, cloud_to_save, subsample_factor);
+    get_pcl_pointcloud(depthmap, cloud_to_save);
     pcl::io::savePCDFileASCII(complete_store_path, *cloud_to_save);
 }
 
@@ -136,7 +135,7 @@ void DepthmapToPointCloudConverter::apply_voxel_grid_filtering(
 
 void DepthmapToPointCloudConverter::apply_frustum_culling(
     const float v_fov, const float h_fov, const float near_plane_dist, const float far_plane_dist,
-    const Eigen::Matrix4f& pose, pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud)
+    const Eigen::Matrix4f& cam_pose, pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud)
 {
     pcl::FrustumCulling<pcl::PointXYZ> fc;
     fc.setInputCloud(pointcloud);
@@ -144,7 +143,7 @@ void DepthmapToPointCloudConverter::apply_frustum_culling(
     fc.setHorizontalFOV(h_fov);
     fc.setNearPlaneDistance(near_plane_dist);
     fc.setFarPlaneDistance(far_plane_dist);
-    fc.setCameraPose(pose);
+    fc.setCameraPose(cam_pose);
     fc.filter(*pointcloud);
 }
 

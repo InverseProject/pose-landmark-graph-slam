@@ -22,7 +22,7 @@ public:
     NodePublishPointcloudFromDepthmap(
         const std::string& in_odom_topic, const std::string& in_depthmap_topic,
         const std::string& out_cloud_topic, const Eigen::Matrix3Xf& intrinsics_matrix,
-        int subsample_factor);
+        const std::vector<bool>& filter_flags);
 
     ~NodePublishPointcloudFromDepthmap();
 
@@ -30,11 +30,21 @@ public:
         const nav_msgs::OdometryConstPtr& odom_msg, const sensor_msgs::ImageConstPtr& depthmap_msg);
 
 private:
+    /**
+     * This function applies different point cloud filters to remove noise and outliers.
+     * @param pointcloud(pcl::PointCloud<pcl::PointXYZ>::Ptr&): shared pcl point cloud pointer
+     */
+    void ApplyFilters(pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
+
     // Camera intrisincis
     Eigen::Matrix3Xf intrinsics_matrix_;
 
-    // Subsample factor
-    int subsample_factor_ = 1;
+    // Flags to enable different filters
+    // filter_flags_[0] -> statistical outlier removal
+    // filter_flags_[1] -> approximate voxel grid
+    // filter_flags_[2] -> voxel grid
+    // filter_flags_[3] -> frustum culling
+    std::vector<bool> filter_flags_;
 
     // Setup subscribers
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub_;
