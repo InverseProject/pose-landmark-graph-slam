@@ -1,8 +1,6 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <opencv2/core/core.hpp>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
@@ -66,7 +64,7 @@ void NodePublishPointcloudFromDepthmap::Callback(
     depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, pc_from_depth);
 
     // Apply different filters to reduce noise and remove outliers
-    ApplyFilters(pc_from_depth);
+    apply_filters(pc_from_depth);
 
     // Create ROS PointCloud2 message
     sensor_msgs::PointCloud2Ptr points_to_publish;
@@ -81,7 +79,7 @@ void NodePublishPointcloudFromDepthmap::Callback(
     cloud_pub_.publish(points_to_publish);
 }
 
-void NodePublishPointcloudFromDepthmap::ApplyFilters(
+void NodePublishPointcloudFromDepthmap::apply_filters(
     pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud)
 {
     if (filter_flags_[0])

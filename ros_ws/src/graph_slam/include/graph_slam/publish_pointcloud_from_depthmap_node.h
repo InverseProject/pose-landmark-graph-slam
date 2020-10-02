@@ -6,6 +6,8 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -34,7 +36,7 @@ private:
      * This function applies different point cloud filters to remove noise and outliers.
      * @param pointcloud(pcl::PointCloud<pcl::PointXYZ>::Ptr&): shared pcl point cloud pointer
      */
-    void ApplyFilters(pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
+    void apply_filters(pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
 
     // Camera intrisincis
     Eigen::Matrix3Xf intrinsics_matrix_;
