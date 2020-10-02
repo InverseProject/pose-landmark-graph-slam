@@ -135,7 +135,7 @@ public:
         pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
 
     // upper bound of a depth value in meters (m)
-    static constexpr float depth_upper_limit = 65.535;
+    static constexpr float depth_upper_limit = 5.0;
 
     // lower bound of a depth value in meters (m)
     static constexpr float depth_lower_limit = .196;

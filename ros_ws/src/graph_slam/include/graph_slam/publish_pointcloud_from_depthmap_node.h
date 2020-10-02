@@ -17,29 +17,50 @@
 namespace graph_slam
 {
 
+/**
+ * This class takes care of publishing time synchronized point clouds given throttled odometry and
+ * raw depth maps
+ */
 class NodePublishPointcloudFromDepthmap
 {
 
 public:
+    /**
+     * Constructor
+     *
+     * @param in_odom_topic (const std::string&): throttled odometry
+     * @param in_depthmap_topic (const std::string&): raw depth map
+     * @param out_cloud_topic (const std::string&): time syncrhonized point cloud
+     * @param intrinsics_matrix (const Eigen::Matrix3Xf&): camera's intrinsics matrix
+     * @param filter_flags (const std::vector<bool>&): flags for point cloud filters
+     */
     NodePublishPointcloudFromDepthmap(
         const std::string& in_odom_topic, const std::string& in_depthmap_topic,
         const std::string& out_cloud_topic, const Eigen::Matrix3Xf& intrinsics_matrix,
         const std::vector<bool>& filter_flags);
 
+    /**
+     * Destructor
+     */
     ~NodePublishPointcloudFromDepthmap();
 
+    /**
+     * Callback fuction that takes both throttled odometry and raw depth map messages and publishes
+     * time syncrhonized point clouds
+     *
+     * @param odom_msg (const nav_msgs::OdometryConstPtr&): odometry message
+     * @param depthmap_msg (const sensor_msgs::ImageConstPtr&): depth map message
+     */
     void Callback(
         const nav_msgs::OdometryConstPtr& odom_msg, const sensor_msgs::ImageConstPtr& depthmap_msg);
 
 private:
     /**
      * This function applies different point cloud filters to remove noise and outliers.
+     *
      * @param pointcloud(pcl::PointCloud<pcl::PointXYZ>::Ptr&): shared pcl point cloud pointer
      */
     void apply_filters(pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
-
-    // Camera intrisincis
-    Eigen::Matrix3Xf intrinsics_matrix_;
 
     // Flags to enable different filters
     // filter_flags_[0] -> statistical outlier removal
@@ -63,6 +84,6 @@ private:
 
     // Setup publisher
     ros::Publisher cloud_pub_;
-};
+};  // namespace graph_slam
 
 }  // namespace graph_slam

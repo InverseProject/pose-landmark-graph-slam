@@ -15,7 +15,6 @@ NodePublishPointcloudFromDepthmap::NodePublishPointcloudFromDepthmap(
     const std::string& in_odom_topic, const std::string& in_depthmap_topic,
     const std::string& out_cloud_topic, const Eigen::Matrix3Xf& intrinsics_matrix,
     const std::vector<bool>& filter_flags) :
-      intrinsics_matrix_(intrinsics_matrix),
       filter_flags_(filter_flags)
 
 {
@@ -67,10 +66,11 @@ void NodePublishPointcloudFromDepthmap::Callback(
     apply_filters(pc_from_depth);
 
     // Create ROS PointCloud2 message
-    sensor_msgs::PointCloud2Ptr points_to_publish;
+    sensor_msgs::PointCloud2Ptr points_to_publish = boost::make_shared<sensor_msgs::PointCloud2>();
 
     // Convert obtained point cloud to ROS PointCloud2 message
     pcl::toROSMsg(*pc_from_depth, *points_to_publish);
+    points_to_publish->header.frame_id = "map";
 
     // Change PointCloud2's timestamp to odom's timestamp
     points_to_publish->header.stamp = odom_msg->header.stamp;
