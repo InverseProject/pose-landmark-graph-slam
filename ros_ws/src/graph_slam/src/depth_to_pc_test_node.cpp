@@ -6,28 +6,25 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <cv_bridge/cv_bridge.h>
 
-//#include <graph_slam/depthmap_to_pointcloud_converter.h>
 #include <graph_slam/depth_to_pc_test_node.h>
 
 namespace graph_slam
 {
 
-DepthToPCTest::DepthToPCTest(
+DepthToPCTestNode::DepthToPCTestNode(
     const std::string& in_depthmap_topic, const std::string& out_cloud_topic,
     const Eigen::Matrix3Xf& intrinsics_matrix)
 {
     ros::NodeHandle nh;
 
-    depthmap_sub_ = nh.subscribe(in_depthmap_topic, 5, &DepthToPCTest::Callback, this);
+    depthmap_sub_ = nh.subscribe(in_depthmap_topic, 5, &DepthToPCTestNode::Callback, this);
 
     depthmap_to_pc_converter_ = std::make_shared<DepthmapToPointCloudConverter>(intrinsics_matrix);
 
     cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>(out_cloud_topic, 5);
 }
 
-DepthToPCTest::~DepthToPCTest() = default;
-
-void DepthToPCTest::Callback(const sensor_msgs::ImageConstPtr& depthmap_msg)
+void DepthToPCTestNode::Callback(const sensor_msgs::ImageConstPtr& depthmap_msg)
 {
     cv_bridge::CvImagePtr cv_ptr;
     try
@@ -59,7 +56,7 @@ void DepthToPCTest::Callback(const sensor_msgs::ImageConstPtr& depthmap_msg)
 
     // Convert obtained point cloud to ROS PointCloud2 message
     pcl::toROSMsg(*pc_from_depth, *points_to_publish);
-    points_to_publish->header.frame_id = "map";
+    points_to_publish->header.frame_id = depthmap_msg->header.frame_id;
 
     // Publish PointCloud2 message
     cloud_pub_.publish(points_to_publish);
@@ -90,13 +87,7 @@ int main(int argc, char** argv)
 
     Eigen::Matrix3f intrinsics_eigen = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
 
-    // cv::Mat mock_depth_map = load_depthmap(depthmap_path);
-    // mock_depth_map.convertTo(mock_depth_map, CV_32F);
-
-    // graph_slam::DepthmapToPointCloudConverter convert_depthmap_to_pc(intrinsics_eigen);
-
-    // convert_depthmap_to_pc.save_pointcloud_to_pcd(mock_depth_map, pcd_save_path);
-    graph_slam::DepthToPCTest node_depth_to_pc(
+    graph_slam::DepthToPCTestNode node_depth_to_pc(
         in_depthmap_topic, out_cloud_topic, intrinsics_eigen);
 
     ros::spin();

@@ -30,9 +30,14 @@ public:
      *
      * @param in_odom_topic (const std::string&): throttled odometry
      * @param in_depthmap_topic (const std::string&): raw depth map
-     * @param out_cloud_topic (const std::string&): time syncrhonized point cloud
+     * @param out_cloud_topic (const std::string&): time synchronized point cloud
      * @param intrinsics_matrix (const Eigen::Matrix3Xf&): camera's intrinsics matrix
-     * @param filter_flags (const std::vector<bool>&): flags for point cloud filters
+     * @param filter_flags (const std::vector<bool>&): flags for point cloud filters. Currently, we
+     * only support 4 different filters.
+     * filter_flags_[0] -> statistical outlier removal
+     * filter_flags_[1] -> approximate voxel grid
+     * filter_flags_[2] -> voxel grid
+     * filter_flags_[3] -> frustum culling
      */
     NodePublishPointcloudFromDepthmap(
         const std::string& in_odom_topic, const std::string& in_depthmap_topic,
@@ -46,7 +51,7 @@ public:
 
     /**
      * Callback fuction that takes both throttled odometry and raw depth map messages and publishes
-     * time syncrhonized point clouds
+     * time synchronized point clouds
      *
      * @param odom_msg (const nav_msgs::OdometryConstPtr&): odometry message
      * @param depthmap_msg (const sensor_msgs::ImageConstPtr&): depth map message
@@ -56,17 +61,14 @@ public:
 
 private:
     /**
-     * This function applies different point cloud filters to remove noise and outliers.
+     * This function applies different point cloud filters to remove noise and outliers. This
+     * function internally uses private boolean vector, filter_flags_.
      *
      * @param pointcloud(pcl::PointCloud<pcl::PointXYZ>::Ptr&): shared pcl point cloud pointer
      */
-    void apply_filters(pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
+    void ApplyFilters(pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
 
-    // Flags to enable different filters
-    // filter_flags_[0] -> statistical outlier removal
-    // filter_flags_[1] -> approximate voxel grid
-    // filter_flags_[2] -> voxel grid
-    // filter_flags_[3] -> frustum culling
+    // vector container to store filter flags
     std::vector<bool> filter_flags_;
 
     // Setup subscribers
@@ -84,6 +86,6 @@ private:
 
     // Setup publisher
     ros::Publisher cloud_pub_;
-};  // namespace graph_slam
+};
 
 }  // namespace graph_slam

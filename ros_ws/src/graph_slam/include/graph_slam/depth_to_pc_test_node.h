@@ -13,7 +13,7 @@ namespace graph_slam
 /**
  * ROS subscriber to test depthmap to point cloud conversion
  */
-class DepthToPCTest
+class DepthToPCTestNode
 {
 
 public:
@@ -24,14 +24,14 @@ public:
      * @param out_cloud_topic (const std::string&): ROS topic for converted point cloud
      * @param intrinsic_matrix (const Eigen::Matrix3Xf&): camera's intrinsics matrix
      */
-    DepthToPCTest(
+    DepthToPCTestNode(
         const std::string& in_depthmap_topic, const std::string& out_cloud_topic,
         const Eigen::Matrix3Xf& intrinsics_matrix);
 
     /**
      * Desturctor
      */
-    ~DepthToPCTest();
+    ~DepthToPCTestNode() = default;
 
     /**
      * Callback function to read depth map and convert it into point cloud for publishing

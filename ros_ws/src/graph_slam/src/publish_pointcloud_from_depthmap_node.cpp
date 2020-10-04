@@ -63,14 +63,14 @@ void NodePublishPointcloudFromDepthmap::Callback(
     depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, pc_from_depth);
 
     // Apply different filters to reduce noise and remove outliers
-    apply_filters(pc_from_depth);
+    ApplyFilters(pc_from_depth);
 
     // Create ROS PointCloud2 message
     sensor_msgs::PointCloud2Ptr points_to_publish = boost::make_shared<sensor_msgs::PointCloud2>();
 
     // Convert obtained point cloud to ROS PointCloud2 message
     pcl::toROSMsg(*pc_from_depth, *points_to_publish);
-    points_to_publish->header.frame_id = "map";
+    points_to_publish->header.frame_id = depthmap_msg->header.frame_id;
 
     // Change PointCloud2's timestamp to odom's timestamp
     points_to_publish->header.stamp = odom_msg->header.stamp;
@@ -79,7 +79,7 @@ void NodePublishPointcloudFromDepthmap::Callback(
     cloud_pub_.publish(points_to_publish);
 }
 
-void NodePublishPointcloudFromDepthmap::apply_filters(
+void NodePublishPointcloudFromDepthmap::ApplyFilters(
     pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud)
 {
     if (filter_flags_[0])
