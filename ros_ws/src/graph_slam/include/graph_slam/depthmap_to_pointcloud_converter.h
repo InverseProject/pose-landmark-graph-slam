@@ -67,26 +67,80 @@ public:
      * This function takes 2D depth map and stores a pcl point cloud in output_pc
      *
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
-     * @param output_pc (pcl::PointCloud<pcl::PointXYZ>::Ptr&) : converted point cloud as a
-     * @param subsample_factor (int) : subsample factor enables sub sampling entire point cloud
-     * reference
+     * @param subsample_factor (int): subsampling factor to skip over points for reducing total
+     * number of points
+     * @param output_pc (pcl::PointCloud<pcl::PointXYZ>::Ptr&) : converted point cloud in a pointer
      */
     void get_pcl_pointcloud(
-        const cv::Mat& depthmap, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc,
-        int subsample_factor);
+        const cv::Mat& depthmap, int subsample_factor,
+        pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc);
 
     /**
      * This function saves converted point clouds into pcd format
      *
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
-     * @param save_file_path (std::string) : path to store point clouds as pcd. If
-     * @param subsample_factor (int) : subsample factor enables sub sampling entire point cloud
+     * @param subsample_factor (int): subsampling factor to skip over points for reducing total
+     * number of points
+     * @param save_file_path (std::string) : path to store point clouds as pcd.
      */
     void save_pointcloud_to_pcd(
-        const cv::Mat& depthmap, const std::string& save_file_path, int subsample_factor);
+        const cv::Mat& depthmap, int subsample_factor, const std::string& save_file_path);
+
+    /**
+     * It applies statistical outlier removal filtering on incoming point cloud.
+     * Reference:
+     * https://pointclouds.org/documentation/classpcl_1_1_statistical_outlier_removal.html
+     *
+     * @param mean_k_value (const int): number of nearest neighbors
+     * @param std_dev_multiplier (const float): standard deviation multiplier for the distance
+     * threshold calculation. Distance threshold = mean + std_dev_multiplier * std_dev.
+     * @param pointcloud (pcl::PointCloud<pcl::PointXYZ>::Ptr&): incoming PCL point cloud pointer.
+     * After appyling the filter, the caller already has filtered pointcloud at the same pointer.
+     */
+    static void apply_statistical_outlier_removal_filtering(
+        const int mean_k_value, const float std_dev_multiplier,
+        pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
+
+    /**
+     * It applies approximate voxel grid filtering on incoming point cloud.
+     * Reference: https://pointclouds.org/documentation/classpcl_1_1_approximate_voxel_grid.html
+     *
+     * @param leaf_size (const std::vector<float>&): voxel dimension [x,y,z]
+     * @param pointcloud (pcl::PointCloud<pcl::PointXYZ>::Ptr&): incoming PCL point cloud pointer.
+     * After appyling the filter, the caller already has filtered pointcloud at the same pointer.
+     */
+    static void apply_approximate_voxel_grid_filtering(
+        const std::vector<float>& leaf_size, pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
+
+    /**
+     * It applies voxel grid filtering on incoming point cloud.
+     * Reference: https://pointclouds.org/documentation/classpcl_1_1_voxel_grid.html
+     *
+     * @param leaf_size (const std::vector<float>&): voxel dimension [x,y,z]
+     * @param pointcloud (pcl::PointCloud<pcl::PointXYZ>::Ptr&): incoming PCL point cloud pointer.
+     * After appyling the filter, the caller already has filtered pointcloud at the same pointer.
+     */
+    static void apply_voxel_grid_filtering(
+        const std::vector<float>& leaf_size, pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
+
+    /**
+     * It applies frustum culling filter on incoming point cloud.
+     * Reference: https://pointclouds.org/documentation/classpcl_1_1_frustum_culling.html
+     *
+     * @param v_fov (const float): camera's vertical field of view
+     * @param h_fov (const float): camera's horizontal field of view
+     * @param near_plane_dist (const float): frustum's near plane
+     * @param far_plane_dist (const far_plane_dist): frustum's far plane
+     * @param cam_pose (const Eigen::Matrix4f&): camera pose w.r.t. to the origin
+     * @param pointcloud (pcl::PointCloud<pcl::PointXYZ>::Ptr&): incoming PCL point cloud pointer.
+     * After appyling the filter, the caller already has filtered pointcloud at the same pointer.
+     */
+    static void apply_frustum_culling(
+        float v_fov, float h_fov, float near_plane_dist, float far_plane_dist,
+        const Eigen::Matrix4f& cam_pose, pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
 
     // upper bound of a depth value in meters (m)
-    static constexpr float depth_upper_limit = 65.535;
+    static constexpr float depth_upper_limit = 5.0;
 
     // lower bound of a depth value in meters (m)
     static constexpr float depth_lower_limit = .196;

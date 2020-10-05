@@ -1,15 +1,18 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="subsample_factor" default="1"/>
-    <arg name="depthmap_path" default="$(find graph_slam)/test/test_maps_293.png"/>
-    <arg name="pcd_save_path" default="$(find graph_slam)/test/"/>
+    <!-- NOTE: THe depthmap topic musth be /depthmap -->
+    <!-- But, Sachin's rosbag is /depth_map. Please change the topic name when it gets fixed-->
+    <arg name="in_depthmap_topic" default="/depth_map"/>
+    <arg name="out_cloud_topic" default="/cloud_test"/> 
+    <arg name="subsample_factor" default="10"/>
 
     <node pkg="graph_slam" name="depth_to_pc_test_node" type="depth_to_pc_test_node" output="screen">
         <rosparam file="$(find graph_slam)/config/intrinsics.yaml"/>
-        <param name="subsample_factor" value="10"/>
-        <param name="depthmap_path" value="$(arg depthmap_path)"/>
-        <param name="pcd_save_path" value="$(arg pcd_save_path)"/>
+        <rosparam file="$(find graph_slam)/config/pointcloud_filters.yaml"/>
+        <param name="in_depthmap_topic" value="$(arg in_depthmap_topic)"/>
+        <param name="out_cloud_topic" value="$(arg out_cloud_topic)"/>
+        <param name="subsample_factor" value="$(arg subsample_factor)"/>
     </node>
 
 </launch>
