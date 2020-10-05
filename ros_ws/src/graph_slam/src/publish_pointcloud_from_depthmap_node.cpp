@@ -6,7 +6,6 @@
 #include <cv_bridge/cv_bridge.h>
 
 #include <graph_slam/publish_pointcloud_from_depthmap_node.h>
-// #include <graph_slam/depthmap_to_pointcloud_converter.h>
 
 namespace graph_slam
 {
@@ -14,9 +13,9 @@ namespace graph_slam
 NodePublishPointcloudFromDepthmap::NodePublishPointcloudFromDepthmap(
     const std::string& in_odom_topic, const std::string& in_depthmap_topic,
     const std::string& out_cloud_topic, const Eigen::Matrix3Xf& intrinsics_matrix,
-    const std::vector<bool>& filter_flags) :
-      filter_flags_(filter_flags)
-
+    const std::vector<bool>& filter_flags, int subsample_factor) :
+      filter_flags_(filter_flags),
+      subsample_factor_(subsample_factor)
 {
     ros::NodeHandle nh;
 
@@ -34,8 +33,6 @@ NodePublishPointcloudFromDepthmap::NodePublishPointcloudFromDepthmap(
     // Setup Publishers
     cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>(out_cloud_topic, 5);
 }
-
-NodePublishPointcloudFromDepthmap::~NodePublishPointcloudFromDepthmap() = default;
 
 void NodePublishPointcloudFromDepthmap::Callback(
     const nav_msgs::OdometryConstPtr& odom_msg, const sensor_msgs::ImageConstPtr& depthmap_msg)
@@ -60,7 +57,7 @@ void NodePublishPointcloudFromDepthmap::Callback(
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc_from_depth =
         boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
 
-    depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, pc_from_depth);
+    depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, subsample_factor_, pc_from_depth);
 
     // Apply different filters to reduce noise and remove outliers
     ApplyFilters(pc_from_depth);
@@ -123,6 +120,7 @@ int main(int argc, char** argv)
     std::string out_cloud_topic = "";
     std::vector<float> intrinsics;
     std::vector<bool> filter_flags;
+    int subsample_factor;
 
     int bad_params = 0;
 
@@ -131,6 +129,7 @@ int main(int argc, char** argv)
     bad_params += !pnh.getParam("out_cloud_topic", out_cloud_topic);
     bad_params += !pnh.getParam("intrinsic_matrix", intrinsics);
     bad_params += !pnh.getParam("filter_flags", filter_flags);
+    bad_params += !pnh.getParam("subsample_factor", subsample_factor);
 
     if (bad_params > 0)
     {
@@ -141,7 +140,8 @@ int main(int argc, char** argv)
     Eigen::Matrix3f intrinsics_matrix = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
 
     graph_slam::NodePublishPointcloudFromDepthmap node_odom_throttle(
-        in_odom_topic, in_depthmap_topic, out_cloud_topic, intrinsics_matrix, filter_flags);
+        in_odom_topic, in_depthmap_topic, out_cloud_topic, intrinsics_matrix, filter_flags,
+        subsample_factor);
 
     ros::spin();
     return 0;

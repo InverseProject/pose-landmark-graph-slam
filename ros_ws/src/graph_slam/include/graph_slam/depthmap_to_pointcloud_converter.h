@@ -67,18 +67,24 @@ public:
      * This function takes 2D depth map and stores a pcl point cloud in output_pc
      *
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
+     * @param subsample_factor (int): subsampling factor to skip over points for reducing total
+     * number of points
      * @param output_pc (pcl::PointCloud<pcl::PointXYZ>::Ptr&) : converted point cloud in a pointer
      */
-    void
-    get_pcl_pointcloud(const cv::Mat& depthmap, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc);
+    void get_pcl_pointcloud(
+        const cv::Mat& depthmap, int subsample_factor,
+        pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc);
 
     /**
      * This function saves converted point clouds into pcd format
      *
      * @param depthmap (const cv::Mat&) : 2D depth map with a size of (height, width)
+     * @param subsample_factor (int): subsampling factor to skip over points for reducing total
+     * number of points
      * @param save_file_path (std::string) : path to store point clouds as pcd.
      */
-    void save_pointcloud_to_pcd(const cv::Mat& depthmap, const std::string& save_file_path);
+    void save_pointcloud_to_pcd(
+        const cv::Mat& depthmap, int subsample_factor, const std::string& save_file_path);
 
     /**
      * It applies statistical outlier removal filtering on incoming point cloud.
@@ -130,9 +136,8 @@ public:
      * After appyling the filter, the caller already has filtered pointcloud at the same pointer.
      */
     static void apply_frustum_culling(
-        const float v_fov, const float h_fov, const float near_plane_dist,
-        const float far_plane_dist, const Eigen::Matrix4f& cam_pose,
-        pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
+        float v_fov, float h_fov, float near_plane_dist, float far_plane_dist,
+        const Eigen::Matrix4f& cam_pose, pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud);
 
     // upper bound of a depth value in meters (m)
     static constexpr float depth_upper_limit = 5.0;

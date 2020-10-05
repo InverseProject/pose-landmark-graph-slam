@@ -13,7 +13,10 @@ namespace graph_slam
 
 DepthToPCTestNode::DepthToPCTestNode(
     const std::string& in_depthmap_topic, const std::string& out_cloud_topic,
-    const Eigen::Matrix3Xf& intrinsics_matrix)
+    const Eigen::Matrix3Xf& intrinsics_matrix, const std::vector<bool>& filter_flags,
+    int subsample_factor) :
+      filter_flags_(filter_flags),
+      subsample_factor_(subsample_factor)
 {
     ros::NodeHandle nh;
 
@@ -45,11 +48,10 @@ void DepthToPCTestNode::Callback(const sensor_msgs::ImageConstPtr& depthmap_msg)
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc_from_depth =
         boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
 
-    depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, pc_from_depth);
+    depthmap_to_pc_converter_->get_pcl_pointcloud(cv_ptr->image, subsample_factor_, pc_from_depth);
 
     // Apply different filters on point clouds
-    DepthmapToPointCloudConverter::apply_statistical_outlier_removal_filtering(
-        100, 1, pc_from_depth);
+    ApplyFilters(pc_from_depth);
 
     // Create ROS PointCloud2 message
     sensor_msgs::PointCloud2Ptr points_to_publish = boost::make_shared<sensor_msgs::PointCloud2>();
@@ -62,6 +64,37 @@ void DepthToPCTestNode::Callback(const sensor_msgs::ImageConstPtr& depthmap_msg)
     cloud_pub_.publish(points_to_publish);
 }
 
+void DepthToPCTestNode::ApplyFilters(pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud)
+{
+    if (filter_flags_[0])
+    {
+        DepthmapToPointCloudConverter::apply_statistical_outlier_removal_filtering(
+            50, 1, pointcloud);
+    }
+
+    if (filter_flags_[1])
+    {
+        DepthmapToPointCloudConverter::apply_approximate_voxel_grid_filtering(
+            {0.01f, 0.01f, 0.01f}, pointcloud);
+    }
+
+    if (filter_flags_[2])
+    {
+        DepthmapToPointCloudConverter::apply_voxel_grid_filtering(
+            {0.01f, 0.01f, 0.01f}, pointcloud);
+    }
+
+    if (filter_flags_[3])
+    {
+        Eigen::Matrix4f cam_pose;
+
+        // traditional camera pose (X->Right, Y->Down, Z->Forward)
+        cam_pose << 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+        DepthmapToPointCloudConverter::apply_frustum_culling(
+            56.74, 71.86, 1.0, 5.0, cam_pose, pointcloud);
+    }
+}
+
 }  // namespace graph_slam
 
 int main(int argc, char** argv)
@@ -69,15 +102,19 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "depth_to_pc_test_node");
     ros::NodeHandle pnh("~");
 
-    std::vector<float> intrinsics;
     std::string in_depthmap_topic = "";
     std::string out_cloud_topic = "";
+    std::vector<float> intrinsics;
+    std::vector<bool> filter_flags;
+    int subsample_factor;
 
     int bad_params = 0;
 
     bad_params += !pnh.getParam("in_depthmap_topic", in_depthmap_topic);
     bad_params += !pnh.getParam("out_cloud_topic", out_cloud_topic);
     bad_params += !pnh.getParam("intrinsic_matrix", intrinsics);
+    bad_params += !pnh.getParam("filter_flags", filter_flags);
+    bad_params += !pnh.getParam("subsample_factor", subsample_factor);
 
     if (bad_params > 0)
     {
@@ -88,7 +125,7 @@ int main(int argc, char** argv)
     Eigen::Matrix3f intrinsics_eigen = Eigen::Map<Eigen::Matrix3f>(intrinsics.data());
 
     graph_slam::DepthToPCTestNode node_depth_to_pc(
-        in_depthmap_topic, out_cloud_topic, intrinsics_eigen);
+        in_depthmap_topic, out_cloud_topic, intrinsics_eigen, filter_flags, subsample_factor);
 
     ros::spin();
 

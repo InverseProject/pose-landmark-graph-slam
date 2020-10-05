@@ -56,12 +56,11 @@ DepthmapToPointCloudConverter::inverse_project_depthmap_into_3d(const cv::Mat& d
     points.row(1) = row_idx_flat_row_vec;
     points.row(2) = one_flat_row_vec;
 
-    // TODO(Sean) : optimize this line instead of multiplying (N,N) diagonal matrix
     return intrinsics_.inverse() * points * depth_flat_row_vec.asDiagonal();
 }
 
 void DepthmapToPointCloudConverter::get_pcl_pointcloud(
-    const cv::Mat& depthmap, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc)
+    const cv::Mat& depthmap, int subsample_factor, pcl::PointCloud<pcl::PointXYZ>::Ptr& output_pc)
 {
     auto points_3d = inverse_project_depthmap_into_3d(depthmap);
 
@@ -71,7 +70,7 @@ void DepthmapToPointCloudConverter::get_pcl_pointcloud(
     // reserve memory space for optimization
     output_pc->reserve(total_points);
 
-    for (int i = 0; i < total_points; i++)
+    for (int i = 0; i < total_points; i += subsample_factor)
     {
         if (points_3d(2, i) >= depth_lower_limit && points_3d(2, i) < depth_upper_limit)
         {
@@ -87,7 +86,7 @@ void DepthmapToPointCloudConverter::get_pcl_pointcloud(
 }
 
 void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
-    const cv::Mat& depthmap, const std::string& save_file_path)
+    const cv::Mat& depthmap, int subsample_factor, const std::string& save_file_path)
 {
     if (save_file_path.empty())
     {
@@ -100,7 +99,7 @@ void DepthmapToPointCloudConverter::save_pointcloud_to_pcd(
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_to_save =
         boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
 
-    get_pcl_pointcloud(depthmap, cloud_to_save);
+    get_pcl_pointcloud(depthmap, subsample_factor, cloud_to_save);
     pcl::io::savePCDFileASCII(complete_store_path, *cloud_to_save);
 }
 
@@ -134,7 +133,7 @@ void DepthmapToPointCloudConverter::apply_voxel_grid_filtering(
 }
 
 void DepthmapToPointCloudConverter::apply_frustum_culling(
-    const float v_fov, const float h_fov, const float near_plane_dist, const float far_plane_dist,
+    float v_fov, float h_fov, float near_plane_dist, float far_plane_dist,
     const Eigen::Matrix4f& cam_pose, pcl::PointCloud<pcl::PointXYZ>::Ptr& pointcloud)
 {
     pcl::FrustumCulling<pcl::PointXYZ> fc;

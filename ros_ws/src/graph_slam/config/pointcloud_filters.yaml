@@ -1,3 +1,8 @@
+# Filter flags enable the following filters
+# [0]: statistical outlier removal
+# [1]: approximate voxel grid
+# [2]: voxel grid
+# [3]: frustum culling 
 filter_flags:
   - false
   - false

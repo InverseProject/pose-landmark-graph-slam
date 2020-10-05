@@ -38,16 +38,17 @@ public:
      * filter_flags_[1] -> approximate voxel grid
      * filter_flags_[2] -> voxel grid
      * filter_flags_[3] -> frustum culling
+     * @param subsample_factor (int):
      */
     NodePublishPointcloudFromDepthmap(
         const std::string& in_odom_topic, const std::string& in_depthmap_topic,
         const std::string& out_cloud_topic, const Eigen::Matrix3Xf& intrinsics_matrix,
-        const std::vector<bool>& filter_flags);
+        const std::vector<bool>& filter_flags, int subsample_factor);
 
     /**
      * Destructor
      */
-    ~NodePublishPointcloudFromDepthmap();
+    ~NodePublishPointcloudFromDepthmap() = default;
 
     /**
      * Callback fuction that takes both throttled odometry and raw depth map messages and publishes
@@ -70,6 +71,9 @@ private:
 
     // vector container to store filter flags
     std::vector<bool> filter_flags_;
+
+    // subsampling factor
+    int subsample_factor_ = 1;
 
     // Setup subscribers
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub_;
