@@ -2,11 +2,12 @@
 <launch>
 
     <include file="$(find turtlebot_interface)/launch/odom_throttle_node.launch">
-        <arg name="distance_threshold" default="0.2"/>
-        <arg name="rotation_threshold" default="0.3"/>
+        <arg name="distance_threshold" value="0.2"/>
+        <arg name="rotation_threshold" value="0.3"/>
     </include>
-    <include file="$(find graph_slam)/launch/publish_pointcloud_from_depthmap_node.launch"/>
-        <arg name="subsample_factor" default="32"/>
+    <include file="$(find graph_slam)/launch/publish_pointcloud_from_depthmap_node.launch">
+        <arg name="subsample_factor" value="32"/>
+    </include>
     <include file="$(find graph_slam)/launch/create_map_node.launch"/>
     
     <!--yaw, pitch, roll-->
