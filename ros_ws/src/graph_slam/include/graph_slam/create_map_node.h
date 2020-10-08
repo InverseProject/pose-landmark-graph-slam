@@ -15,6 +15,9 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl/common/transforms.h>
 
+#include <tf2_ros/transform_listener.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 namespace graph_slam
 {
 
@@ -52,6 +55,10 @@ public:
         const sensor_msgs::PointCloud2ConstPtr& cloud_msg);
 
 private:
+    // tf2 for lookup transform
+    std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+
     // Class variables
     bool use_odom_as_correct_poses_ = true;
     pcl::PointCloud<pcl::PointXYZ>::Ptr curr_map_cloud_;

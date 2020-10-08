@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="in_odom_topic" default="/odom"/>
-    <arg name="in_depthmap_topic" default="/depthmap"/>
+    <arg name="in_odom_topic" default="/odom/throttled"/>
+    <arg name="in_depthmap_topic" default="/depth_map"/>
     <arg name="out_cloud_topic" default="/cloud_synced"/>
     <arg name="subsample_factor" default="10"/>
    

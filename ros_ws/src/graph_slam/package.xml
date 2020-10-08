@@ -58,6 +58,9 @@
   <depend>opencv3</depend>
   <depend>eigen</depend>
   <depend>pcl_ros</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2</depend>
+  <depend>tf2_geometry_msgs</depend>
 
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>

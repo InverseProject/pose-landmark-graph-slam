@@ -1,6 +1,8 @@
-#include <graph_slam/create_map_node.h>
 
+#include <geometry_msgs/TransformStamped.h>
 #include <pcl_conversions/pcl_conversions.h>
+
+#include <graph_slam/create_map_node.h>
 
 namespace graph_slam
 {
@@ -35,6 +37,9 @@ CreateMapNode::CreateMapNode(
 
     // Initialize map cloud
     curr_map_cloud_ = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+
+    tf_buffer_ = std::make_shared<tf2_ros::Buffer>();
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 
 CreateMapNode::~CreateMapNode() = default;
@@ -47,17 +52,33 @@ void CreateMapNode::CallbackCreateMapWithOdomPoses(
         boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
     pcl::fromROSMsg(*cloud_msg, *curr_cloud);
 
-    // Create transform from Odometry message
-    Eigen::Vector3f translation(
-        odom_msg->pose.pose.position.x, odom_msg->pose.pose.position.y,
-        odom_msg->pose.pose.position.z);
+    // Getting translation and rotation from odom to OAK-D
+    geometry_msgs::TransformStamped odom_to_oak_transform_stamped_msg;
+    try
+    {
+        odom_to_oak_transform_stamped_msg =
+            tf_buffer_->lookupTransform("odom", "OAK-D-right", ros::Time(cloud_msg->header.stamp));
+    }
+    catch (const tf2::TransformException& e)
+    {
+        std::cout << "Transform exception: " << e.what() << std::endl;
+        return;
+    }
 
-    Eigen::Quaternionf rotation(
-        odom_msg->pose.pose.orientation.w, odom_msg->pose.pose.orientation.x,
-        odom_msg->pose.pose.orientation.y, odom_msg->pose.pose.orientation.z);
+    tf2::Transform odom_to_oak_transform;
+    tf2::fromMsg(odom_to_oak_transform_stamped_msg.transform, odom_to_oak_transform);
+    tf2::Vector3 odom_to_oak_origin_tf2 = odom_to_oak_transform.getOrigin();
+    tf2::Quaternion odom_to_oak_quat_tf2 = odom_to_oak_transform.getRotation();
+    Eigen::Vector3f odom_to_oak_origin = {static_cast<float>(odom_to_oak_origin_tf2.getX()),
+                                          static_cast<float>(odom_to_oak_origin_tf2.getY()),
+                                          static_cast<float>(odom_to_oak_origin_tf2.getZ())};
+    Eigen::Quaternionf odom_to_oak_quat = {static_cast<float>(odom_to_oak_quat_tf2.getW()),
+                                           static_cast<float>(odom_to_oak_quat_tf2.getX()),
+                                           static_cast<float>(odom_to_oak_quat_tf2.getY()),
+                                           static_cast<float>(odom_to_oak_quat_tf2.getZ())};
 
     // Transform current cloud into the odometry frame
-    pcl::transformPointCloud(*curr_cloud, *curr_cloud, translation, rotation);
+    pcl::transformPointCloud(*curr_cloud, *curr_cloud, odom_to_oak_origin, odom_to_oak_quat);
 
     // Concatenate current cloud into the map cloud
     *curr_map_cloud_ += *curr_cloud;
@@ -65,10 +86,11 @@ void CreateMapNode::CallbackCreateMapWithOdomPoses(
     // Convert Point Cloud to ROS message
     sensor_msgs::PointCloud2Ptr out_cloud_msg = boost::make_shared<sensor_msgs::PointCloud2>();
     pcl::toROSMsg(*curr_map_cloud_, *out_cloud_msg);
+    out_cloud_msg->header.frame_id = odom_msg->header.frame_id;
     out_cloud_msg->header.stamp = cloud_msg->header.stamp;
 
     // Publish cloud
-    map_cloud_pub_.publish(curr_map_cloud_);
+    map_cloud_pub_.publish(out_cloud_msg);
 }
 
 }  // namespace graph_slam

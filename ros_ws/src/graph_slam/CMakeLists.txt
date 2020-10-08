@@ -13,6 +13,9 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   sensor_msgs
   cv_bridge
+  tf2_ros
+  tf2
+  tf2_geometry_msgs
 )
 
 find_package(OpenCV REQUIRED)
@@ -114,6 +117,9 @@ catkin_package(
   CATKIN_DEPENDS
     roscpp
     rospy
+    tf2_ros
+    tf2
+    tf2_geometry_msgs
   DEPENDS
     OpenCV
     Eigen
