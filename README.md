@@ -1,5 +1,9 @@
 # pose-landmark-graph-slam
 
+[WIP] This is a work in progress.
+
+
+<!--
 # Coding Style VS-Code setup
 We will be using WebKit Clang Format style to format C++ code in this repository. Follow this setup:
 1. Install `clang-format` using `sudo apt install clang-format`.
@@ -24,3 +28,4 @@ We will be using WebKit Clang Format style to format C++ code in this repository
 ]
 ```
 5. Now, everytime we save, the code will get auto-formatted to the WebKit style.
+-->
