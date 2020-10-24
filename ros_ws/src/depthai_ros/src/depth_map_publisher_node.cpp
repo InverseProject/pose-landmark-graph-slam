@@ -86,45 +86,12 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
 
     while (ros::ok())
     {   
-        cv::Mat rectified_right, filtered_disparity;
+        cv::Mat rectified_right, filtered_disparity,disp_map;
         oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
         
         cv::flip(*output_streams_["rectified_right"], rectified_right, 1);
-        // wls_filter_->filter(*output_streams_["disparity"], rectified_right, filtered_disparity);
-        
-        // cv::Mat im_color_disp;
-        // cv::applyColorMap(*output_streams_["disparity"], im_color_disp, cv::COLORMAP_JET);
-        // cv::imshow("direct disparity",im_color_disp );
-        // cv::waitKey(1);
-        double min, max;
-        // cv::minMaxLoc(*output_streams_["disparity"], &min, &max);
-        // std::cout << min << "   " << max << std::endl;
-        // std::cout << "Field vales" << std::endl;
-        // for(auto kv : output_streams_){
-        //     std::cout << kv.first << std::endl;
-        // }    
-        cv::Mat disp_map;
-        output_streams_["disparity"]->convertTo(disp_map, CV_16S);
-        // wls_filter_->setLambda(lambda);
-        // wls_filter_->setSigmaColor(sigma);
-    
+        output_streams_["disparity"]->convertTo(disp_map, CV_16S);    
         wls_filter_->filter(disp_map, rectified_right, filtered_disparity);
-
-        // cv::minMaxLoc(disp_map, &min, &max);
-        // std::cout << min << "   " << max << std::endl;
-        // cv::imshow("rectified right", rectified_right);
-        // cv::waitKey(1);
-        // // cv::imshow("direct view", img);
-        // // cv::waitKey(1);
-
-        cv::Mat im_color;
-        filtered_disparity.convertTo(im_color, CV_8U);
-        cv::applyColorMap(im_color, im_color, cv::COLORMAP_JET);
-        cv::imshow("colored view rectified disparity", im_color);
-        cv::waitKey(1);
-        
-        cv::minMaxLoc(filtered_disparity, &min, &max);
-        std::cout << min << "   " << max << std::endl;
 
         std::vector<int> lut(256, 0);
         float focal_length = 1280 / (2.f * std::tan(71.86 / 2 / 180.f * std::acos(-1)));
@@ -132,10 +99,9 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
         {
             float z_m = ( focal_length * 7.5 / i);
             lut[i] = std::min(65535.f, z_m * 10.f); 
-            std::cout << lut[i] << "--" << z_m* 10.f << "--" << i << std::endl; 
+            // std::cout << lut[i] << "--" << z_m* 10.f << "--" << i << std::endl; 
         }
-        std::cout << type2str(filtered_disparity.type()) << std::endl;
-        // throw std::runtime_error("Config file could not be found at ");
+        
         cv::Mat depth_map(720, 1280, CV_16UC1);
 
         for(int i = 0; i < filtered_disparity.rows; ++i)
@@ -148,14 +114,6 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
                 q[j] = lut[p[j]];
             }
         }
-        cv::minMaxLoc(depth_map, &min, &max);
-        std::cout << min << "   " << max << std::endl;
-        cv::imshow("colored view rectified depth", depth_map);
-        cv::Mat im_colored;
-        depth_map.convertTo(im_colored, CV_8U);
-        cv::applyColorMap(im_colored, im_colored, cv::COLORMAP_JET);
-        cv::imshow("colored view rectified depth2", im_colored);
-        cv::waitKey(1);
 
         std_msgs::Header header;
         header.stamp = ros::Time::now();
