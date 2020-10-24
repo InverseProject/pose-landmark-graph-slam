@@ -6,6 +6,10 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <unordered_map>
+#include "opencv2/ximgproc.hpp"
+
+using namespace cv;
+using namespace cv::ximgproc;
 
 namespace depthai_ros
 {
@@ -54,5 +58,6 @@ private:
     ros::Publisher depth_map_pub_;
     std::unique_ptr<DepthAI::DepthAI> oak_;
     std::unordered_map<std::string, CV_mat_ptr> output_streams_;
+    Ptr<DisparityWLSFilter> wls_filter_;
 };
 }  // namespace depthai_ros

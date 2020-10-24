@@ -4,9 +4,28 @@
 #include <cv_bridge/cv_bridge.h>
 #include "depthai_ros/depth_map_publisher_node.h"
 #include <unordered_map>
+#include <opencv2/ximgproc/disparity_filter.hpp>
+#include <math.h>
+
 
 namespace depthai_ros
 {
+
+int lambda = 199*100;
+float sigma = 13/10; 
+int sigma_slider = 15;
+
+static void on_trackbar_signma(int value, void*)
+{
+   sigma = value / float(10);
+   return;
+}
+
+static void on_trackbar_lambda(int value, void*)
+{
+   lambda = value * 100;
+   return;
+}
 
 DepthMapPublisherNode::DepthMapPublisherNode(
     const std::string& config_file_path, const std::string& depth_map_topic,
@@ -24,6 +43,14 @@ DepthMapPublisherNode::DepthMapPublisherNode(
 
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
+    wls_filter_ = cv::ximgproc::createDisparityWLSFilterGeneric(false);
+    wls_filter_->setLambda(lambda);
+    wls_filter_->setSigmaColor(sigma);
+    std::string name = "colored view rectified disparity";
+    namedWindow(name, WINDOW_AUTOSIZE);
+    // createTrackbar( "sigma", name, &sigma_slider, 100, on_trackbar_signma );
+    // createTrackbar( "lambda", name, &lambda, 255, on_trackbar_lambda );
+
 }
 
 // Destroying OAK-D ptr
@@ -35,8 +62,75 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
     oak_->send_disparity_confidence_threshold(disparity_confidence_threshold);
 
     while (ros::ok())
-    {
+    {   
+        cv::Mat rectified_right, filtered_disparity;
         oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
+        
+        cv::flip(*output_streams_["rectified_right"], rectified_right, 1);
+        // wls_filter_->filter(*output_streams_["disparity"], rectified_right, filtered_disparity);
+        
+        // cv::Mat im_color_disp;
+        // cv::applyColorMap(*output_streams_["disparity"], im_color_disp, cv::COLORMAP_JET);
+        // cv::imshow("direct disparity",im_color_disp );
+        // cv::waitKey(1);
+        double min, max;
+        // cv::minMaxLoc(*output_streams_["disparity"], &min, &max);
+        // std::cout << min << "   " << max << std::endl;
+        // std::cout << "Field vales" << std::endl;
+        // for(auto kv : output_streams_){
+        //     std::cout << kv.first << std::endl;
+        // }    
+        cv::Mat disp_map;
+        output_streams_["disparity"]->convertTo(disp_map, CV_16S);
+        // wls_filter_->setLambda(lambda);
+        // wls_filter_->setSigmaColor(sigma);
+    
+        wls_filter_->filter(disp_map, rectified_right, filtered_disparity);
+
+        // cv::minMaxLoc(disp_map, &min, &max);
+        // std::cout << min << "   " << max << std::endl;
+        // cv::imshow("rectified right", rectified_right);
+        // cv::waitKey(1);
+        // // cv::imshow("direct view", img);
+        // // cv::waitKey(1);
+
+        cv::Mat im_color;
+        filtered_disparity.convertTo(im_color, CV_8U);
+        cv::applyColorMap(im_color, im_color, cv::COLORMAP_JET);
+        cv::imshow("colored view rectified disparity", im_color);
+        cv::waitKey(1);
+        
+        cv::minMaxLoc(filtered_disparity, &min, &max);
+        std::cout << min << "   " << max << std::endl;
+
+        std::vector<int> lut(256, 0);
+        float focal_length = 1280 / (2.f * std::tan(71.86 / 2 / 180.f * std::acos(-1)));
+        for (int i = 0; i < 256; ++i)
+        {
+            float z_m = ( focal_length * 7.5 / i);
+            lut[i] = std::min(65535.f, z_m * 10.f); 
+            // std::cout << lut[i] << "--" << z_m* 10.f << std::endl; 
+        }
+
+        cv::Mat depth_map(720, 1280, CV_16UC1);
+
+        for(int i = 0; i < filtered_disparity.rows; ++i)
+        {
+            uchar* p = filtered_disparity.ptr<uchar>(i);
+            uchar* q = depth_map.ptr<uchar>(i);
+            for (int j = 0; j < filtered_disparity.cols; ++j)
+            {  
+                //  std::cout << (int)p[j] << std::endl;
+                q[j] = lut[p[j]];
+            }
+        }
+        cv::minMaxLoc(depth_map, &min, &max);
+        std::cout << min << "   " << max << std::endl;
+        cv::Mat im_colored;
+        depth_map.convertTo(im_colored, CV_8U);
+        cv::applyColorMap(im_colored, im_colored, cv::COLORMAP_JET);
+        cv::imshow("colored view rectified depth", im_colored);
+        cv::waitKey(1);
 
         std_msgs::Header header;
         header.stamp = ros::Time::now();
@@ -44,13 +138,12 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
 
         sensor_msgs::ImagePtr depthmap_msg =
             cv_bridge::CvImage(
-                header, sensor_msgs::image_encodings::TYPE_16UC1, *output_streams_["depth"])
+                header, sensor_msgs::image_encodings::TYPE_16UC1, depth_map)
                 .toImageMsg();
         depth_map_pub_.publish(depthmap_msg);
 
         ros::spinOnce();
     }
-
     return;
 }
 
