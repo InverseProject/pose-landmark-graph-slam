@@ -27,6 +27,29 @@ static void on_trackbar_lambda(int value, void*)
    return;
 }
 
+static std::string type2str(int type) {
+  std::string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch ( depth ) {
+    case CV_8U:  r = "8U"; break;
+    case CV_8S:  r = "8S"; break;
+    case CV_16U: r = "16U"; break;
+    case CV_16S: r = "16S"; break;
+    case CV_32S: r = "32S"; break;
+    case CV_32F: r = "32F"; break;
+    case CV_64F: r = "64F"; break;
+    default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans+'0');
+
+  return r;
+}
+
 DepthMapPublisherNode::DepthMapPublisherNode(
     const std::string& config_file_path, const std::string& depth_map_topic,
     const std::string& landmark_topic, const int rate) :
@@ -109,27 +132,29 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
         {
             float z_m = ( focal_length * 7.5 / i);
             lut[i] = std::min(65535.f, z_m * 10.f); 
-            // std::cout << lut[i] << "--" << z_m* 10.f << std::endl; 
+            std::cout << lut[i] << "--" << z_m* 10.f << "--" << i << std::endl; 
         }
-
+        std::cout << type2str(filtered_disparity.type()) << std::endl;
+        // throw std::runtime_error("Config file could not be found at ");
         cv::Mat depth_map(720, 1280, CV_16UC1);
 
         for(int i = 0; i < filtered_disparity.rows; ++i)
         {
-            uchar* p = filtered_disparity.ptr<uchar>(i);
-            uchar* q = depth_map.ptr<uchar>(i);
+            signed short* p = filtered_disparity.ptr<signed short>(i);
+            unsigned short* q = depth_map.ptr<unsigned short>(i);
             for (int j = 0; j < filtered_disparity.cols; ++j)
             {  
-                //  std::cout << (int)p[j] << std::endl;
+                //  std::cout << filtered_disparity[i][j] << std::endl;
                 q[j] = lut[p[j]];
             }
         }
         cv::minMaxLoc(depth_map, &min, &max);
         std::cout << min << "   " << max << std::endl;
+        cv::imshow("colored view rectified depth", depth_map);
         cv::Mat im_colored;
         depth_map.convertTo(im_colored, CV_8U);
         cv::applyColorMap(im_colored, im_colored, cv::COLORMAP_JET);
-        cv::imshow("colored view rectified depth", im_colored);
+        cv::imshow("colored view rectified depth2", im_colored);
         cv::waitKey(1);
 
         std_msgs::Header header;
