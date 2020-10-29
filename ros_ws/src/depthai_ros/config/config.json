@@ -18,7 +18,7 @@
         }
     ],
     "ai": {
-        "blob_file": "/home/sachin/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.blob",
-        "blob_file_config": "/home/sachin/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.json"
+        "blob_file": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.blob",
+        "blob_file_config": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.json"
     }
 }

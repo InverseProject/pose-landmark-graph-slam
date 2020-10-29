@@ -47,7 +47,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
-
+message("Opencv incoude dir----------> ${OpenCV_INCLUDE_DIRS}")
 add_executable(depth_map_publisher_node
   src/depth_map_publisher_node.cpp
 )
@@ -58,7 +58,7 @@ add_dependencies(depth_map_publisher_node
 )
 
 target_link_libraries(depth_map_publisher_node PUBLIC depthai-core
- ${catkin_LIBRARIES}
+ ${catkin_LIBRARIES} /usr/lib/aarch64-linux-gnu/libopencv_ximgproc.so.3.2
 )
 
 #--------------------------------- ->

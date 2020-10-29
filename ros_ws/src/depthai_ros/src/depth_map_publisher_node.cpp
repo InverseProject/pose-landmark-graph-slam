@@ -66,9 +66,12 @@ DepthMapPublisherNode::DepthMapPublisherNode(
 
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
+    for (int i = 0; i< 30000; ++i);
+    std::cout << "wls filter starting---->" << std::endl;
     wls_filter_ = cv::ximgproc::createDisparityWLSFilterGeneric(false);
     wls_filter_->setLambda(lambda);
     wls_filter_->setSigmaColor(sigma);
+    std::cout << "wls filter ster" << std::endl;
     // std::string name = "colored view rectified disparity";
     // namedWindow(name, WINDOW_AUTOSIZE);
     // createTrackbar( "sigma", name, &sigma_slider, 100, on_trackbar_signma );
@@ -85,7 +88,8 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
     oak_->send_disparity_confidence_threshold(disparity_confidence_threshold);
 
     while (ros::ok())
-    {   
+    {
+	    std::cout << "publishing" << std::endl;   
         cv::Mat rectified_right, filtered_disparity,disp_map;
         oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
         
