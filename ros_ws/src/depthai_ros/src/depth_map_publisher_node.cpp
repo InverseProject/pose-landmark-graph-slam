@@ -12,7 +12,7 @@ namespace depthai_ros
 {
 
 int lambda = 199*100;
-float sigma = 13/10; 
+float sigma = 15/10; 
 int sigma_slider = 15;
 
 static void on_trackbar_signma(int value, void*)
@@ -69,8 +69,8 @@ DepthMapPublisherNode::DepthMapPublisherNode(
     wls_filter_ = cv::ximgproc::createDisparityWLSFilterGeneric(false);
     wls_filter_->setLambda(lambda);
     wls_filter_->setSigmaColor(sigma);
-    std::string name = "colored view rectified disparity";
-    namedWindow(name, WINDOW_AUTOSIZE);
+    // std::string name = "colored view rectified disparity";
+    // namedWindow(name, WINDOW_AUTOSIZE);
     // createTrackbar( "sigma", name, &sigma_slider, 100, on_trackbar_signma );
     // createTrackbar( "lambda", name, &lambda, 255, on_trackbar_lambda );
 
