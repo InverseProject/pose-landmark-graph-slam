@@ -6,48 +6,67 @@
 #include <unordered_map>
 #include <opencv2/ximgproc/disparity_filter.hpp>
 #include <math.h>
+#include <list>
 
 
 namespace depthai_ros
 {
 
-int lambda = 199*100;
-float sigma = 15/10; 
+int lambda = 199 * 100;
+float sigma = 15 / 10;
 int sigma_slider = 15;
 
 static void on_trackbar_signma(int value, void*)
 {
-   sigma = value / float(10);
-   return;
+    sigma = value / float(10);
+    return;
 }
 
 static void on_trackbar_lambda(int value, void*)
 {
-   lambda = value * 100;
-   return;
+    lambda = value * 100;
+    return;
 }
 
-static std::string type2str(int type) {
-  std::string r;
+static std::string type2str(int type)
+{
+    std::string r;
 
-  uchar depth = type & CV_MAT_DEPTH_MASK;
-  uchar chans = 1 + (type >> CV_CN_SHIFT);
+    uchar depth = type & CV_MAT_DEPTH_MASK;
+    uchar chans = 1 + (type >> CV_CN_SHIFT);
 
-  switch ( depth ) {
-    case CV_8U:  r = "8U"; break;
-    case CV_8S:  r = "8S"; break;
-    case CV_16U: r = "16U"; break;
-    case CV_16S: r = "16S"; break;
-    case CV_32S: r = "32S"; break;
-    case CV_32F: r = "32F"; break;
-    case CV_64F: r = "64F"; break;
-    default:     r = "User"; break;
-  }
+    switch (depth)
+    {
+    case CV_8U:
+        r = "8U";
+        break;
+    case CV_8S:
+        r = "8S";
+        break;
+    case CV_16U:
+        r = "16U";
+        break;
+    case CV_16S:
+        r = "16S";
+        break;
+    case CV_32S:
+        r = "32S";
+        break;
+    case CV_32F:
+        r = "32F";
+        break;
+    case CV_64F:
+        r = "64F";
+        break;
+    default:
+        r = "User";
+        break;
+    }
 
-  r += "C";
-  r += (chans+'0');
+    r += "C";
+    r += (chans + '0');
 
-  return r;
+    return r;
 }
 
 DepthMapPublisherNode::DepthMapPublisherNode(
@@ -66,7 +85,8 @@ DepthMapPublisherNode::DepthMapPublisherNode(
 
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
-    for (int i = 0; i< 30000; ++i);
+    for (int i = 0; i < 30000; ++i)
+        ;
     std::cout << "wls filter starting---->" << std::endl;
     wls_filter_ = cv::ximgproc::createDisparityWLSFilterGeneric(false);
     wls_filter_->setLambda(lambda);
@@ -76,7 +96,6 @@ DepthMapPublisherNode::DepthMapPublisherNode(
     // namedWindow(name, WINDOW_AUTOSIZE);
     // createTrackbar( "sigma", name, &sigma_slider, 100, on_trackbar_signma );
     // createTrackbar( "lambda", name, &lambda, 255, on_trackbar_lambda );
-
 }
 
 // Destroying OAK-D ptr
@@ -86,34 +105,56 @@ DepthMapPublisherNode::~DepthMapPublisherNode() { oak_->~DepthAI(); }
 void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
 {
     oak_->send_disparity_confidence_threshold(disparity_confidence_threshold);
+    std::list<std::shared_ptr<NNetPacket>> op_NNet_detections;
 
     while (ros::ok())
     {
-	    std::cout << "publishing" << std::endl;   
-        cv::Mat rectified_right, filtered_disparity,disp_map;
-        oak_->get_streams(output_streams_);  // Fetching the frames from the oak-d
-        
+        std::cout << "publishing" << std::endl;
+        cv::Mat rectified_right, filtered_disparity, disp_map;
+        oak_->get_streams(
+            output_streams_, op_NNet_detections);  // Fetching the frames from the oak-d
+
+        std::list<std::shared_ptr<NNetPacket>>::iterator it;
+        for (it = op_NNet_detections.begin(); it != op_NNet_detections.end(); ++it)
+        {
+            auto obj_detections = (*it)->getDetectedObjects();
+
+            for (int i = 0; i < obj_detections->detection_count; ++i)
+            {
+                auto detection = obj_detections->detections[i];
+                std::cout << "label" << detection.label << std::endl;
+                std::cout << "confidence" << detection.confidence << std::endl;
+                std::cout << "x_min" << detection.x_min << std::endl;
+                std::cout << "y_min" << detection.y_min << std::endl;
+                std::cout << "x_max" << detection.x_max << std::endl;
+                std::cout << "y_max" << detection.y_max << std::endl;
+                std::cout << "depth_x" << detection.depth_x << std::endl;
+                std::cout << "depth_y" << detection.depth_y << std::endl;
+                std::cout << "depth_z" << detection.depth_z << std::endl;
+            }
+        }
+
         cv::flip(*output_streams_["rectified_right"], rectified_right, 1);
-        output_streams_["disparity"]->convertTo(disp_map, CV_16S);    
+        output_streams_["disparity"]->convertTo(disp_map, CV_16S);
         wls_filter_->filter(disp_map, rectified_right, filtered_disparity);
 
         std::vector<int> lut(256, 0);
         float focal_length = 1280 / (2.f * std::tan(71.86 / 2 / 180.f * std::acos(-1)));
         for (int i = 0; i < 256; ++i)
         {
-            float z_m = ( focal_length * 7.5 / i);
-            lut[i] = std::min(65535.f, z_m * 10.f); 
-            // std::cout << lut[i] << "--" << z_m* 10.f << "--" << i << std::endl; 
+            float z_m = (focal_length * 7.5 / i);
+            lut[i] = std::min(65535.f, z_m * 10.f);
+            // std::cout << lut[i] << "--" << z_m* 10.f << "--" << i << std::endl;
         }
-        
+
         cv::Mat depth_map(720, 1280, CV_16UC1);
 
-        for(int i = 0; i < filtered_disparity.rows; ++i)
+        for (int i = 0; i < filtered_disparity.rows; ++i)
         {
             signed short* p = filtered_disparity.ptr<signed short>(i);
             unsigned short* q = depth_map.ptr<unsigned short>(i);
             for (int j = 0; j < filtered_disparity.cols; ++j)
-            {  
+            {
                 //  std::cout << filtered_disparity[i][j] << std::endl;
                 q[j] = lut[p[j]];
             }
@@ -124,8 +165,7 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
         header.frame_id = "OAK-D-right";
 
         sensor_msgs::ImagePtr depthmap_msg =
-            cv_bridge::CvImage(
-                header, sensor_msgs::image_encodings::TYPE_16UC1, depth_map)
+            cv_bridge::CvImage(header, sensor_msgs::image_encodings::TYPE_16UC1, depth_map)
                 .toImageMsg();
         depth_map_pub_.publish(depthmap_msg);
 

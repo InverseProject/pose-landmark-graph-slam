@@ -15,10 +15,27 @@
         {
             "name": "rectified_left",
             "max_fps": 12.0
+        },
+        {
+            "name": "metaout",
+            "max_fps": 12.0
         }
     ],
+    // "ai": {
+    //     "blob_file": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.blob",
+    //     "blob_file_config": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.json"
+    // }
     "ai": {
-        "blob_file": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.blob",
-        "blob_file_config": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.json"
-    }
+           "blob_file": "/home/sachin/Desktop/luxonis/depthai/resources/nn/mobilenet-ssd/mobilenet-ssd.blob.sh14cmx14NCE1", 
+           "blob_file_config": "/home/sachin/Desktop/luxonis/depthai/resources/nn/mobilenet-ssd/mobilenet-ssd.json", 
+           "blob_file2": "", 
+           "blob_file_config2": "", 
+           "calc_dist_to_bb": true, 
+           "keep_aspect_ratio": true, 
+           "camera_input": "right", 
+           "shaves": 14, 
+           "cmx_slices": 14, 
+           "NN_engines": 1
+    }, 
+    "ot": {"max_tracklets": 20, "confidence_threshold": 0.5}
 }
