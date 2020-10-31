@@ -13,18 +13,15 @@
             "max_fps": 12.0
         },
         {
-            "name": "rectified_left",
+            "name": "right",
             "max_fps": 12.0
         },
         {
-            "name": "metaout",
+            "name": "rectified_left",
             "max_fps": 12.0
-        }
-    ],
-    // "ai": {
-    //     "blob_file": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.blob",
-    //     "blob_file_config": "/home/jetbot/Desktop/cv_comp/mobilenet-ssd/mobilenet-ssd.json"
-    // }
+        },
+         "metaout"
+],
     "ai": {
            "blob_file": "/home/sachin/Desktop/luxonis/depthai/resources/nn/mobilenet-ssd/mobilenet-ssd.blob.sh14cmx14NCE1", 
            "blob_file_config": "/home/sachin/Desktop/luxonis/depthai/resources/nn/mobilenet-ssd/mobilenet-ssd.json", 

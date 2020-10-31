@@ -114,6 +114,7 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
         oak_->get_streams(
             output_streams_, op_NNet_detections);  // Fetching the frames from the oak-d
 
+        std::cout << "detected objs " << op_NNet_detections.size() << std::endl;
         std::list<std::shared_ptr<NNetPacket>>::iterator it;
         for (it = op_NNet_detections.begin(); it != op_NNet_detections.end(); ++it)
         {
