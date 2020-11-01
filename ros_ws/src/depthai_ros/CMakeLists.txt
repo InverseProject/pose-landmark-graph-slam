@@ -18,6 +18,18 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(OpenCV)
 
+add_message_files(
+  FILES
+  BoundingBox.msg
+  detection.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
+
 # add_service_files(
 #   FILES
 #   disparity_threshold.srv
@@ -47,7 +59,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
-
+message("Opencv incoude dir----------> ${OpenCV_INCLUDE_DIRS}")
 add_executable(depth_map_publisher_node
   src/depth_map_publisher_node.cpp
 )
