@@ -5,6 +5,8 @@
 #include "depthai_ros/depth_map_publisher_node.h"
 #include <unordered_map>
 #include <opencv2/ximgproc/disparity_filter.hpp>
+#include <depthai_ros/BoundingBox.h>
+#include <depthai_ros/detection.h>
 #include <math.h>
 #include <list>
 
@@ -15,59 +17,6 @@ namespace depthai_ros
 int lambda = 199 * 100;
 float sigma = 15 / 10;
 int sigma_slider = 15;
-
-static void on_trackbar_signma(int value, void*)
-{
-    sigma = value / float(10);
-    return;
-}
-
-static void on_trackbar_lambda(int value, void*)
-{
-    lambda = value * 100;
-    return;
-}
-
-static std::string type2str(int type)
-{
-    std::string r;
-
-    uchar depth = type & CV_MAT_DEPTH_MASK;
-    uchar chans = 1 + (type >> CV_CN_SHIFT);
-
-    switch (depth)
-    {
-    case CV_8U:
-        r = "8U";
-        break;
-    case CV_8S:
-        r = "8S";
-        break;
-    case CV_16U:
-        r = "16U";
-        break;
-    case CV_16S:
-        r = "16S";
-        break;
-    case CV_32S:
-        r = "32S";
-        break;
-    case CV_32F:
-        r = "32F";
-        break;
-    case CV_64F:
-        r = "64F";
-        break;
-    default:
-        r = "User";
-        break;
-    }
-
-    r += "C";
-    r += (chans + '0');
-
-    return r;
-}
 
 DepthMapPublisherNode::DepthMapPublisherNode(
     const std::string& config_file_path, const std::string& depth_map_topic,
@@ -82,16 +31,14 @@ DepthMapPublisherNode::DepthMapPublisherNode(
 
     // setup the publisher for depth map
     depth_map_pub_ = nh.advertise<sensor_msgs::Image>(depth_map_topic_, 10);
-
+    landmarks_pub_ = nh.advertise<depthai_ros::detection>(landmark_topic_, 10);
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
-    for (int i = 0; i < 30000; ++i)
-        ;
-    std::cout << "wls filter starting---->" << std::endl;
+ 
     wls_filter_ = cv::ximgproc::createDisparityWLSFilterGeneric(false);
     wls_filter_->setLambda(lambda);
     wls_filter_->setSigmaColor(sigma);
-    std::cout << "wls filter ster" << std::endl;
+ 
     // std::string name = "colored view rectified disparity";
     // namedWindow(name, WINDOW_AUTOSIZE);
     // createTrackbar( "sigma", name, &sigma_slider, 100, on_trackbar_signma );
@@ -114,25 +61,30 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
         oak_->get_streams(
             output_streams_, op_NNet_detections);  // Fetching the frames from the oak-d
 
+        depthai_ros::detection detection_msg;
+
         std::cout << "detected objs " << op_NNet_detections.size() << std::endl;
         std::list<std::shared_ptr<NNetPacket>>::iterator it;
         for (it = op_NNet_detections.begin(); it != op_NNet_detections.end(); ++it)
         {
             auto obj_detections = (*it)->getDetectedObjects();
-
+            depthai_ros::detection temp_detection_msg;
             for (int i = 0; i < obj_detections->detection_count; ++i)
             {
                 auto detection = obj_detections->detections[i];
-                std::cout << "label" << detection.label << std::endl;
-                std::cout << "confidence" << detection.confidence << std::endl;
-                std::cout << "x_min" << detection.x_min << std::endl;
-                std::cout << "y_min" << detection.y_min << std::endl;
-                std::cout << "x_max" << detection.x_max << std::endl;
-                std::cout << "y_max" << detection.y_max << std::endl;
-                std::cout << "depth_x" << detection.depth_x << std::endl;
-                std::cout << "depth_y" << detection.depth_y << std::endl;
-                std::cout << "depth_z" << detection.depth_z << std::endl;
+                depthai_ros::BoundingBox object;
+                object.label_id =  detection.label ;
+                object.confidence = detection.confidence ;
+                object.xmin =  detection.x_min ;
+                object.ymin =  detection.y_min ;
+                object.xmax =  detection.x_max ;
+                object.ymax =  detection.y_max ;
+                object.depth.x = detection.depth_x ;
+                object.depth.y = detection.depth_y ;
+                object.depth.z = detection.depth_z ;
+                temp_detection_msg.detections.push_back(object);
             }
+            detection_msg = temp_detection_msg;
         }
 
         cv::flip(*output_streams_["rectified_right"], rectified_right, 1);
@@ -165,11 +117,12 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
         header.stamp = ros::Time::now();
         header.frame_id = "OAK-D-right";
 
+        detection_msg.header = header;
         sensor_msgs::ImagePtr depthmap_msg =
             cv_bridge::CvImage(header, sensor_msgs::image_encodings::TYPE_16UC1, depth_map)
                 .toImageMsg();
         depth_map_pub_.publish(depthmap_msg);
-
+        landmarks_pub_.publish(detection_msg);
         ros::spinOnce();
     }
     return;

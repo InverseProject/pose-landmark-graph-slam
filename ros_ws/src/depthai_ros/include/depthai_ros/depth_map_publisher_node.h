@@ -56,6 +56,7 @@ private:
     std::string landmark_topic_;
     std::string disparity_service_name_;
     ros::Publisher depth_map_pub_;
+    ros::Publisher landmarks_pub_;
     std::unique_ptr<DepthAI::DepthAI> oak_;
     std::unordered_map<std::string, CV_mat_ptr> output_streams_;
     Ptr<DisparityWLSFilter> wls_filter_;
