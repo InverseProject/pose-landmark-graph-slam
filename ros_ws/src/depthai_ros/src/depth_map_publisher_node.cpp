@@ -14,10 +14,6 @@
 namespace depthai_ros
 {
 
-int lambda = 199 * 100;
-float sigma = 15 / 10;
-int sigma_slider = 15;
-
 DepthMapPublisherNode::DepthMapPublisherNode(
     const std::string& config_file_path, const std::string& depth_map_topic,
     const std::string& landmark_topic, const int rate) :
@@ -25,11 +21,13 @@ DepthMapPublisherNode::DepthMapPublisherNode(
       depth_map_topic_(depth_map_topic),
       landmark_topic_(landmark_topic)
 {
+    int lambda = 199 * 100;
+    float sigma = 15 / 10;
 
     ros::NodeHandle nh;
     ros::Rate loop_rate(rate);
 
-    // setup the publisher for depth map
+    // setup the publisher for depth map and landmarks detection
     depth_map_pub_ = nh.advertise<sensor_msgs::Image>(depth_map_topic_, 10);
     landmarks_pub_ = nh.advertise<depthai_ros::detection>(landmark_topic_, 10);
     // start the device and create the pipeline
@@ -38,33 +36,39 @@ DepthMapPublisherNode::DepthMapPublisherNode(
     wls_filter_ = cv::ximgproc::createDisparityWLSFilterGeneric(false);
     wls_filter_->setLambda(lambda);
     wls_filter_->setSigmaColor(sigma);
- 
-    // std::string name = "colored view rectified disparity";
-    // namedWindow(name, WINDOW_AUTOSIZE);
-    // createTrackbar( "sigma", name, &sigma_slider, 100, on_trackbar_signma );
-    // createTrackbar( "lambda", name, &lambda, 255, on_trackbar_lambda );
 }
 
 // Destroying OAK-D ptr
 DepthMapPublisherNode::~DepthMapPublisherNode() { oak_->~DepthAI(); }
 
-// Depth map publisher
+// Depth map and landmark publisher
 void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
 {
+    // setting the disparity confidence threshold
     oak_->send_disparity_confidence_threshold(disparity_confidence_threshold);
     std::list<std::shared_ptr<NNetPacket>> op_NNet_detections;
+    std::cout << "publishing" << std::endl;
+
+    // creating lut to convert to depth map
+    std::vector<int> lut(256, 0);
+    float focal_length = 1280 / (2.f * std::tan(71.86 / 2 / 180.f * std::acos(-1)));
+    for (int i = 0; i < 256; ++i)
+    {
+        float z_m = (focal_length * 7.5 / i);
+        lut[i] = std::min(65535.f, z_m * 10.f);
+    }
 
     while (ros::ok())
     {
-        std::cout << "publishing" << std::endl;
         cv::Mat rectified_right, filtered_disparity, disp_map;
+        // Fetching the frames and NN objects from the oak-d
         oak_->get_streams(
-            output_streams_, op_NNet_detections);  // Fetching the frames from the oak-d
+            output_streams_, op_NNet_detections);  
 
         depthai_ros::detection detection_msg;
 
-        std::cout << "detected objs " << op_NNet_detections.size() << std::endl;
         std::list<std::shared_ptr<NNetPacket>>::iterator it;
+        // iterating over list of NNetPacket and adding detections to ros message
         for (it = op_NNet_detections.begin(); it != op_NNet_detections.end(); ++it)
         {
             auto obj_detections = (*it)->getDetectedObjects();
@@ -87,28 +91,20 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
             detection_msg = temp_detection_msg;
         }
 
+        // using wls_filter object to use rectified right 
+        // and disparity to create filtered disparity
         cv::flip(*output_streams_["rectified_right"], rectified_right, 1);
         output_streams_["disparity"]->convertTo(disp_map, CV_16S);
         wls_filter_->filter(disp_map, rectified_right, filtered_disparity);
 
-        std::vector<int> lut(256, 0);
-        float focal_length = 1280 / (2.f * std::tan(71.86 / 2 / 180.f * std::acos(-1)));
-        for (int i = 0; i < 256; ++i)
-        {
-            float z_m = (focal_length * 7.5 / i);
-            lut[i] = std::min(65535.f, z_m * 10.f);
-            // std::cout << lut[i] << "--" << z_m* 10.f << "--" << i << std::endl;
-        }
-
         cv::Mat depth_map(720, 1280, CV_16UC1);
-
+        // converting filtered disparity to depth map 
         for (int i = 0; i < filtered_disparity.rows; ++i)
         {
             signed short* p = filtered_disparity.ptr<signed short>(i);
             unsigned short* q = depth_map.ptr<unsigned short>(i);
             for (int j = 0; j < filtered_disparity.cols; ++j)
             {
-                //  std::cout << filtered_disparity[i][j] << std::endl;
                 q[j] = lut[p[j]];
             }
         }
