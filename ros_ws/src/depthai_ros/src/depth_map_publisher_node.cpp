@@ -10,9 +10,10 @@ namespace depthai_ros
 
 DepthMapPublisherNode::DepthMapPublisherNode(
     const std::string& config_file_path, const std::string& depth_map_topic,
-    const std::string& landmark_topic, const int rate) :
+    const std::string& landmark_topic, const std::string& rgb_topic, const int rate) :
       config_file_path_(config_file_path),
       depth_map_topic_(depth_map_topic),
+      rgb_topic_(rgb_topic),
       landmark_topic_(landmark_topic)
 {
 
@@ -20,8 +21,8 @@ DepthMapPublisherNode::DepthMapPublisherNode(
     ros::Rate loop_rate(rate);
 
     // setup the publisher for depth map
-    depth_map_pub_ = nh.advertise<sensor_msgs::Image>(depth_map_topic_, 10);
-
+    depth_map_pub_ = nh.advertise<sensor_msgs::Image>(depth_map_topic_, 2);
+    rgb_pub_ = nh.advertise<sensor_msgs::Image>(rgb_topic_, 2);
     // start the device and create the pipeline
     oak_.reset(new DepthAI::DepthAI("", config_file_path_, false));
 }
@@ -46,7 +47,14 @@ void DepthMapPublisherNode::Publisher(uint8_t disparity_confidence_threshold)
             cv_bridge::CvImage(
                 header, sensor_msgs::image_encodings::TYPE_16UC1, *output_streams_["depth"])
                 .toImageMsg();
+
+        sensor_msgs::ImagePtr color_msg =
+            cv_bridge::CvImage(
+                header, sensor_msgs::image_encodings::BGR8, *output_streams_["color"])
+                .toImageMsg();
+
         depth_map_pub_.publish(depthmap_msg);
+        rgb_pub_.publish(color_msg);
 
         ros::spinOnce();
     }
@@ -64,6 +72,7 @@ int main(int argc, char** argv)
 
     std::string config_file_path = "";
     std::string depth_map_topic = "";
+    std::string rgb_topic = "";
     std::string landmark_topic = "";
     int disparity_confidence_threshold;
     int rate;
@@ -72,6 +81,7 @@ int main(int argc, char** argv)
 
     bad_params += !pnh.getParam("config_file_path", config_file_path);
     bad_params += !pnh.getParam("depth_map_topic", depth_map_topic);
+    bad_params += !pnh.getParam("rgb_topic", rgb_topic);
     bad_params += !pnh.getParam("landmark_topic", landmark_topic);
     bad_params += !pnh.getParam("disparity_confidence_threshold", disparity_confidence_threshold);
     bad_params += !pnh.getParam("rate", rate);
@@ -83,7 +93,7 @@ int main(int argc, char** argv)
     }
 
     depthai_ros::DepthMapPublisherNode depth_publisher(
-        config_file_path, depth_map_topic, landmark_topic, rate);
+        config_file_path, depth_map_topic, landmark_topic, rgb_topic, rate);
     depth_publisher.Publisher(disparity_confidence_threshold);
 
     return 0;

@@ -30,7 +30,7 @@ public:
      */
     DepthMapPublisherNode(
         const std::string& config_file_path, const std::string& depth_map_topic,
-        const std::string& landmark_topic, const int rate);
+        const std::string& landmark_topic, const std::string& rgb_topic, const int rate);
 
     /**
      * Destructor
@@ -49,9 +49,11 @@ private:
     // Class Private Variables
     std::string config_file_path_;
     std::string depth_map_topic_;
+    std::string rgb_topic_;
     std::string landmark_topic_;
     std::string disparity_service_name_;
     ros::Publisher depth_map_pub_;
+    ros::Publisher rgb_pub_;
     std::unique_ptr<DepthAI::DepthAI> oak_;
     std::unordered_map<std::string, CV_mat_ptr> output_streams_;
 };
