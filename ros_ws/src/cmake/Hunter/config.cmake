@@ -1,37 +1,66 @@
-
-# Hunter config file is used to download and link these downloaded libraries using hunter_add_package()
-hunter_config( 
-    nlohmann_json_schema_validator
-    VERSION "2.1.1"
-    URL "https://github.com/luxonis/json-schema-validator/archive/hunter-2.1.1.tar.gz"
-    SHA1 "1c410bcf1418155215e6b6b8f31284ff66f0f3b4"
-    CMAKE_ARGS
-        BUILD_TESTS=OFF
-        BUILD_EXAMPLE=OFF
-        JSON_VALIDATOR_INSTALL=ON
-        HUNTER_ENABLED=ON
-        CMAKE_POSITION_INDEPENDENT_CODE=ON
+hunter_config(
+    nlohmann_json
+    VERSION "3.9.1"
+    URL "https://github.com/nlohmann/json/archive/v3.9.1.tar.gz"
+    SHA1 "f8a20a7e19227906d77de0ede97468fbcfea03e7"
 )
 
 hunter_config(
     XLink
-    VERSION "luxonis-2020.2"
-    URL  "https://github.com/luxonis/XLink/archive/c944814af18f567d2d0ee54cb2e1a1dc6ee90d76.zip"
-    SHA1 "479414f7b9cfa55080c12d9ec1782bc9820d9521"
-    CMAKE_ARGS
-        CMAKE_POSITION_INDEPENDENT_CODE=ON
+    VERSION "luxonis-2020.2-mx_id_compatible"
+    URL "https://github.com/luxonis/XLink/archive/04bf4dc9be5da5bd471f6df94dbbe995e425d7b1.tar.gz"
+    SHA1 "5aef4de522ae1f0c8a9493158f1bf3a8332cd588"
 )
 
 hunter_config(
     BZip2
     VERSION "1.0.8-p0"
-    CMAKE_ARGS
-        CMAKE_POSITION_INDEPENDENT_CODE=ON
 )
 
 hunter_config(
-    Boost
-    VERSION "1.72.0-p0"
+    spdlog
+    VERSION "1.8.1"
+    URL "https://github.com/gabime/spdlog/archive/v1.8.1.tar.gz"
+    SHA1 "a0fe45cfb77cb4201e9a0e40325c1792dd434a28"
     CMAKE_ARGS
-        CMAKE_POSITION_INDEPENDENT_CODE=ON
+        SPDLOG_BUILD_EXAMPLE=OFF
+        SPDLOG_FMT_EXTERNAL=OFF
+)
+
+# libarchive, luxonis fork
+hunter_config(
+    libarchive
+    VERSION "3.4.2-p2"
+    URL "https://github.com/luxonis/libarchive/archive/cf2caf0588fc5e2af22cae37027d3ff6902e096f.tar.gz"
+    SHA1 "e99477d32ce14292fe652dc5f4f460d3af8fbc93"
+    CMAKE_ARGS
+        ENABLE_ACL=OFF                                           
+        ENABLE_BZip2=OFF                                          
+        ENABLE_CAT=OFF                                          
+        ENABLE_CAT_SHARED=OFF                                          
+        ENABLE_CNG=OFF                                          
+        ENABLE_COVERAGE=OFF                                          
+        ENABLE_CPIO=OFF                                          
+        ENABLE_CPIO_SHARED=OFF                                          
+        ENABLE_EXPAT=OFF                                          
+        ENABLE_ICONV=OFF                                          
+        ENABLE_INSTALL=ON                                          
+        ENABLE_LIBB2=OFF                                          
+        ENABLE_LIBXML2=OFF                                          
+        ENABLE_LZ4=OFF                                          
+        ENABLE_LZMA=ON                                           
+        ENABLE_LZO=OFF                                          
+        ENABLE_LibGCC=OFF                                          
+        ENABLE_MBEDTLS=OFF                                          
+        ENABLE_NETTLE=OFF                                          
+        ENABLE_OPENSSL=OFF                                          
+        ENABLE_PCREPOSIX=OFF                                          
+        ENABLE_SAFESEH=AUTO                                         
+        ENABLE_TAR=OFF                                           
+        ENABLE_TAR_SHARED=OFF                                          
+        ENABLE_TEST=OFF                                          
+        ENABLE_WERROR=OFF                                           
+        ENABLE_XATTR=OFF                                          
+        ENABLE_ZLIB=OFF                                          
+        ENABLE_ZSTD=OFF
 )

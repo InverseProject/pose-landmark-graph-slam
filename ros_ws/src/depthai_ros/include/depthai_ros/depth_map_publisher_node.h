@@ -2,15 +2,13 @@
 
 #include <string>
 #include "ros/ros.h"
-#include "depthai/depthai_wrapper.hpp"
+#include "depthai/depthai.hpp"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <unordered_map>
 
 namespace depthai_ros
 {
-using CV_mat_ptr = std::shared_ptr<cv::Mat>;
-
 /**
  * DepthMapPublisher is a ROS node which launches OAK-D streams as specified in the config file.
  * Currently it is capable of publishing depth map produced by OAK-D.
@@ -54,7 +52,7 @@ private:
     std::string disparity_service_name_;
     ros::Publisher depth_map_pub_;
     ros::Publisher rgb_pub_;
-    std::unique_ptr<DepthAI::DepthAI> oak_;
-    std::unordered_map<std::string, CV_mat_ptr> output_streams_;
+    std::unique_ptr<dai::Device> oak_;
+    dai::Pipeline p_;
 };
 }  // namespace depthai_ros

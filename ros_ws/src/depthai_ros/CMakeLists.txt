@@ -63,18 +63,18 @@ target_link_libraries(depth_map_publisher_node PUBLIC depthai-core
 
 #--------------------------------- ->
 
-add_executable(depth_map_subscriber_node
-  src/depth_map_subscriber_node.cpp
-)
+# add_executable(depth_map_subscriber_node
+#   src/depth_map_subscriber_node.cpp
+# )
 
-add_dependencies(depth_map_subscriber_node
-  ${catkin_EXPORTED_TARGETS} 
-  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
-)
+# add_dependencies(depth_map_subscriber_node
+#   ${catkin_EXPORTED_TARGETS} 
+#   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+# )
 
-target_link_libraries(depth_map_subscriber_node PUBLIC depthai-core
- ${catkin_LIBRARIES}
-)
+# target_link_libraries(depth_map_subscriber_node PUBLIC depthai-core
+#  ${catkin_LIBRARIES}
+# )
 
 #---------------------------------------------------------------#
 ## Declare a C++ library
